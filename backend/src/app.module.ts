@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config'; 
 import { UserModule } from './user/users.module';
+import { RoleModule } from 'roles/roles.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }), // Load environment variables
@@ -21,7 +22,7 @@ import { UserModule } from './user/users.module';
       //   },
       // },
     }),
-    
+   RoleModule, 
   AuthModule,
   UserModule,
   ],

@@ -1,15 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+
+import { RoleEntity } from 'roles/roles.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 export enum UserStatus {
     Active = 'Active',
     Inactive = 'Inactive',
 }
 
-export enum UserRole {
-    Admin = 'Admin',
-    Editor = 'Editor',
-    Viewer = 'Viewer',
-}
+
 
 @Entity('users')
 export class UserEntity {
@@ -28,12 +26,9 @@ export class UserEntity {
     @Column()
     password!: string;
 
-    @Column({
-        type: 'enum',
-        enum: UserRole,
-        default: UserRole.Viewer,
-    })
-    role?: UserRole;
+    @ManyToOne(() => RoleEntity, (role) => role.users)
+    @JoinColumn({ name: 'role_id' })
+    role!: RoleEntity;
 
     @Column({ default: false })
     isDeleted!: boolean;

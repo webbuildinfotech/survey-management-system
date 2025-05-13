@@ -9,19 +9,24 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserDto } from './../user/users.dto';
 import { UserEntity } from './../user/users.entity';
-import { UserRole } from './../user/users.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from 'service/email.service';
+import { RoleEntity } from 'roles/roles.entity';
+import { User } from 'constant/type';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+
+    @InjectRepository(RoleEntity)  // Inject RoleRepository
+    private readonly roleRepository: Repository<RoleEntity>,
+
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   private handleError(error: any): never {
     if (
@@ -36,11 +41,13 @@ export class AuthService {
   }
 
   private generateToken(user: UserEntity): string {
+
     try {
       return this.jwtService.sign({
         sub: user.id,
+        id: user.id,
         email: user.email,
-        role: user.role,
+        role: user.role.name,
       });
     } catch (error) {
       this.handleError(error);
@@ -69,17 +76,34 @@ export class AuthService {
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(userDto.password, saltRounds);
 
-      // Create the new user with hashed password
-      const newUser = this.userRepository.create({
-        ...userDto,
-        password: hashedPassword,
-        role: UserRole.Editor,
-        isDeleted: false,
-      });
+    let role;
+    let roleId = userDto.roleId;
+
+    if (!roleId) {
+      // If no role ID is provided, default to 'User' role
+      role = await this.roleRepository.findOne({ where: { name: User } });
+      if (!role) {
+        throw new BadRequestException('Role "User" not found');
+      }
+    } else {
+      // Otherwise, try to find the role by ID
+      role = await this.roleRepository.findOne({ where: { id: roleId } });
+      if (!role) {
+        throw new BadRequestException('Role not found');
+      }
+    }
+
+    // Create the new user with hashed password
+    const newUser = this.userRepository.create({
+      ...userDto,
+      password: hashedPassword,
+      role: role,  // Assign RoleEntity instead of roleId
+      isDeleted: false,
+    });
 
       await this.userRepository.save(newUser); // Save the new user
       return {
-        message: 'Your account has been created successfully', 
+        message: 'Your account has been created successfully',
         user: newUser,
       };
     } catch (error) {
@@ -92,6 +116,7 @@ export class AuthService {
     try {
       const user = await this.userRepository.findOne({
         where: { email: userDto.email, isDeleted: false },
+        relations: ['role'], // This ensures the role is loaded along with the user
       });
 
       if (!user) {
@@ -145,7 +170,7 @@ export class AuthService {
 
       // Generate OTP
       const otp = this.generateOTP();
-      
+
       // Save OTP and expiry time (5 minutes)
       user.otp = otp;
       user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
@@ -180,7 +205,7 @@ export class AuthService {
 
       // Hash new password
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      
+
       // Update password and clear OTP data
       user.password = hashedPassword;
       user.otp = null

@@ -14,6 +14,7 @@ export class UserService {
   async getAll(): Promise<Partial<UserEntity>[]> {
     const users = await this.userRepository.find({
       where: { isDeleted: false },
+       relations: ['role'],
     });
     return users.map(({ password, isDeleted, ...rest }) => rest);
   }

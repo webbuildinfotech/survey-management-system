@@ -1,4 +1,5 @@
 //users.dto.ts
+import { IsUUID } from 'class-validator';
 import {
   IsNotEmpty,
   IsOptional,
@@ -10,11 +11,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export enum UserRole {
-  Admin = 'Admin',
-  Editor = 'Editor',
-  Viewer = 'Viewer',
-}
+
 
 export class UserDto {
   @IsNotEmpty()
@@ -34,8 +31,8 @@ export class UserDto {
   password?: string;
 
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsUUID()
+  roleId?: string; // role as foreign key
 
   @IsOptional()
   isDeleted?: boolean;
@@ -45,4 +42,5 @@ export class UserDto {
 
   @IsOptional()
   updatedAt?: Date;
+  role: any;
 }

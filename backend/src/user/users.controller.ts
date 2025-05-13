@@ -9,22 +9,26 @@ import {
     UseGuards,
     Put,
     Body,
+    Req,
+    UnauthorizedException,
 } from '@nestjs/common';
-import { UserRole } from './users.dto';
-import { Response } from 'express';
+
+import { Request, Response } from 'express';
 import { UserService } from './users.service';
 import { JwtAuthGuard } from './../jwt/jwt-auth.guard';
 import { RolesGuard } from './../jwt/roles.guard';
 import { Roles } from './../jwt/roles.decorator';
 import { UserEntity } from './users.entity';
+import { Admin } from 'constant/type';
+import { checkUserAdminAuthorization } from 'utils/auth.utils';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
     constructor(private readonly userService: UserService) { }
-    
+
     @Get('list')
-    @Roles(UserRole.Admin)
+    @Roles(Admin) // Only Admin role can access this route
     async getAllUsers(@Res() response: Response) {
         const users = await this.userService.getAll();
         return response.status(HttpStatus.OK).json({
@@ -33,9 +37,12 @@ export class UserController {
         });
     }
 
-    
+
     @Get(':id')
-    async getUserById(@Param('id') id: string, @Res() response: Response) {
+    async getUserById(@Param('id') id: string,
+        @Res() response: Response,
+        @Req() request: Request) {
+        checkUserAdminAuthorization(request, id); // Now `userData` is guaranteed to be a string
         const user = await this.userService.getById(id);
         return response.status(HttpStatus.OK).json({
             data: user,
