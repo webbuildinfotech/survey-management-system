@@ -4,10 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { RoleSeedService } from './role.seed';  // Import the RoleSeedService
 import { RoleEntity } from './roles.entity';
+import { RoleController } from './role.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([RoleEntity])],
   providers: [RoleSeedService],  // Register RoleSeedService here
+  controllers: [RoleController],  // Register the controller here
   exports: [RoleSeedService],  // Export if it's needed in other modules
 })
 export class RoleModule {}
