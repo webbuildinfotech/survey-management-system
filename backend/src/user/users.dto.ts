@@ -11,14 +11,12 @@ import {
   MinLength,
 } from 'class-validator';
 
-
-
 export class UserDto {
   @IsNotEmpty()
   @IsString()
   name?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   mobile?: string;
 
@@ -29,6 +27,10 @@ export class UserDto {
   @IsNotEmpty()
   @IsString()
   password?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  city?: string;
 
   @IsOptional()
   @IsUUID()

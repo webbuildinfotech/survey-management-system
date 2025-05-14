@@ -1,8 +1,7 @@
-import React from 'react';
-import AppRoutes from './routes/AppRoutes';
+import React from "react";
+import AppMainRoutes from "./routes/AppMainRoutes";
 
 function App() {
-  return <AppRoutes />;
+  return <AppMainRoutes />;
 }
-
 export default App;

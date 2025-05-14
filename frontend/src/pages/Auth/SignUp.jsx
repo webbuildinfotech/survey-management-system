@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaUser,
   FaEnvelope,
@@ -14,6 +14,27 @@ import { FaFacebookF, FaApple } from "react-icons/fa";
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [cities, setCities] = useState([]);
+  const [selectedCity, setSelectedCity] = useState("");
+  // Simulate API fetch
+  useEffect(() => {
+    const fetchCities = async () => {
+      // You can replace this with actual API call using Axios or Fetch
+      const cityList = [
+        "London",
+        "Sydney",
+        "Dubai",
+        "New York",
+        "Delhi",
+        "Tokyo",
+        "Surat",
+        "Mumbai",
+        "Paris",
+      ];
+      setCities(cityList);
+    };
+    fetchCities();
+  }, []);
 
   return (
     <div className="pt-10 max-sm:pt-0 bg-white font-sans pb-12">
@@ -76,22 +97,25 @@ const SignUp = () => {
           </div>
         </div>
 
-        {/* City */}
+        {/* City Dropdown */}
         <div className="mb-4">
           <label className="block text-sm font-bold text-black mb-1">
             Select City
           </label>
           <div className="relative">
             <TiLocation className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#1D9BF0] text-2xl" />
-
-            {/* Custom dropdown arrow with icon */}
-            <TiArrowSortedDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black text-2xl font-bold pointer-events-none" />
-
-            <select className="appearance-none w-full  pl-12 pr-8 py-2 bg-[#F7F7F7] text-gray-700 font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option>Select</option>
-              <option>New York</option>
-              <option>Delhi</option>
-              <option>Tokyo</option>
+            <TiArrowSortedDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black text-2xl pointer-events-none" />
+            <select
+              className="appearance-none w-full pl-12 pr-8 py-2 bg-[#F7F7F7] text-gray-700 font-semibold rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+            >
+              <option value="">Select</option>
+              {cities.map((city, index) => (
+                <option key={index} value={city}>
+                  {city}
+                </option>
+              ))}
             </select>
           </div>
         </div>

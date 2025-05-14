@@ -3,20 +3,15 @@ import "../styles/Footer.css";
 import {
   FaTwitter,
   FaLinkedinIn,
-  FaWhatsapp,
   FaFacebookF,
   FaInstagram,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import { FaFacebook } from "react-icons/fa6";
-import { RoutePaths } from "../routes/Path";
+
 const FooterSection = ({ children, index }) => {
   return <div>{children}</div>;
 };
 const Footer = () => {
-  const handleClick = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+
 
   return (
     <footer className="bg-gradient-to-b from-gray-50 to-gray-100">
