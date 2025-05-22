@@ -1,5 +1,4 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { BusinessEntity } from 'business/business.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,7 +37,8 @@ export class AiService {
   async askQuestionForCity(city: string, question: string): Promise<string> {
     try {
       const API_URL = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
-      const token = process.env.HUGGINGFACE_API_KEY
+      // const token = process.env.HUGGINGFACE_API_KEY
+      const token = ''
 
       if (!token) {
         throw new Error('Hugging Face API token not found');
