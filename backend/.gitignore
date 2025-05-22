@@ -9,6 +9,8 @@ yarn-error.log*
 node_modules/
 bower_components/
 
+src/ai/ai-service
+
 # Build output
 dist/
 build/
