@@ -37,8 +37,7 @@ export class AiService {
   async askQuestionForCity(city: string, question: string): Promise<string> {
     try {
       const API_URL = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
-      // const token = process.env.HUGGINGFACE_API_KEY
-      const token = ''
+      const token = process.env.HUGGINGFACE_API_KEY
 
       if (!token) {
         throw new Error('Hugging Face API token not found');
