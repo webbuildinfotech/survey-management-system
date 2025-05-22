@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import { UserEntity } from './../user/users.entity';
 import { EmailService } from './../service/email.service';
-import { RoleEntity } from 'roles/roles.entity';
+import { RoleEntity } from '../roles/roles.entity';
 
 
 dotenv.config(); // Load environment variables

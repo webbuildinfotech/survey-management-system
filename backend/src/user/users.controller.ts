@@ -19,8 +19,8 @@ import { JwtAuthGuard } from './../jwt/jwt-auth.guard';
 import { RolesGuard } from './../jwt/roles.guard';
 import { Roles } from './../jwt/roles.decorator';
 import { UserEntity } from './users.entity';
-import { Admin } from 'constant/type';
-import { checkUserAdminAuthorization } from 'utils/auth.utils';
+import { Admin } from '../constant/type';
+import { checkUserAdminAuthorization } from '../utils/auth.utils';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -28,7 +28,7 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Get('list')
-    @Roles(Admin) // Only Admin role can access this route
+    // @Roles(Admin) // Only Admin role can access this route
     async getAllUsers(@Res() response: Response) {
         const users = await this.userService.getAll();
         return response.status(HttpStatus.OK).json({

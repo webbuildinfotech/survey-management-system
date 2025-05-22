@@ -2,7 +2,7 @@
   "compilerOptions": {
     "typeRoots": [
       "./node_modules/@types",
-      "./src/types" // Include the directory where your custom types are located
+      "./src/types"
     ],
     "types": [
       "node"
@@ -29,7 +29,7 @@
     }
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

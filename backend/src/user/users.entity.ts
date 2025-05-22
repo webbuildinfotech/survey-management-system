@@ -1,4 +1,4 @@
-import { RoleEntity } from 'roles/roles.entity';
+import { RoleEntity } from '../roles/roles.entity';
 import {
   Entity,
   Column,
@@ -52,4 +52,5 @@ export class UserEntity {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt!: Date;
+    location: any;
 }

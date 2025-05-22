@@ -11,9 +11,9 @@ import { UserDto } from './../user/users.dto';
 import { UserEntity } from './../user/users.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { EmailService } from 'service/email.service';
-import { RoleEntity } from 'roles/roles.entity';
-import { User } from 'constant/type';
+import { EmailService } from '../service/email.service';
+import { RoleEntity } from '../roles/roles.entity';
+import { User } from '../constant/type';
 
 @Injectable()
 export class AuthService {

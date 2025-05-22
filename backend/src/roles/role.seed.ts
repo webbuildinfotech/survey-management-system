@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleEntity } from './roles.entity';
-import { Admin, ContentAdmin, User } from 'constant/type';
+import { Admin, ContentAdmin, User } from '../constant/type';
 import { CreateRoleDto, UpdateRoleDto } from './roles.dto';
 
 @Injectable()

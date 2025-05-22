@@ -1,14 +1,26 @@
 import * as crypto from 'crypto';
 import { UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
-import { Admin } from 'constant/type';
+import { Admin } from '../constant/type';
+
+// Define the interface for Request with user
+interface RequestWithUser extends Request {
+  user?: {
+    id?: string;
+    sub: number;
+    email: string;
+    role: string;
+    iat?: number;
+    exp?: number;
+  };
+}
 
 /**
  * Ensures that the authenticated user is accessing only their own data.
  * @param request - Incoming request containing the authenticated user.
  * @param targetUserId - ID from route param (resource owner).
  */
-export function checkUserAuthorization(request: Request, targetUserId: string): void {
+export function checkUserAuthorization(request: RequestWithUser, targetUserId: string): void {
   const userId = request.user?.id;
 
   if (!userId) {
@@ -26,7 +38,7 @@ export function checkUserAuthorization(request: Request, targetUserId: string): 
  * @param request - The incoming request with user info.
  * @param targetUserId - The user ID in the route.
  */
-export function checkUserAdminAuthorization(request: Request, targetUserId: string): void {
+export function checkUserAdminAuthorization(request: RequestWithUser, targetUserId: string): void {
   const user = request.user;
 
   if (!user || !user.id) {

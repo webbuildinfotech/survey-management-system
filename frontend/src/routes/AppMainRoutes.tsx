@@ -8,6 +8,7 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import VerifyCode from "../pages/Auth/VerifyCode";
 import { RoutePaths } from "./Path";
+import Profile from "../pages/Profile/ProfilePage";
 
 const AppMainRoutes = () => (
   <BrowserRouter>
@@ -21,6 +22,8 @@ const AppMainRoutes = () => (
         <Route path={RoutePaths.VERIFY} element={<VerifyCode/>} />
 
         <Route path={RoutePaths.HOME} element={<HomePage />} />
+        <Route path={RoutePaths.PROFILE} element={<Profile />} />
+
         {/* Add more pages here */}
       </Route>
     </Routes>

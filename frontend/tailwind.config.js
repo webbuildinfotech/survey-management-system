@@ -1,16 +1,13 @@
 // tailwind.config.js
 export default {
-    content: [
-      "./index.html",
-      "./src/**/*.{js,ts,jsx,tsx}",
-    ],
-    theme: {
-      extend: {
-        fontFamily: {
-          josefin: ['"Josefin Sans"', 'sans-serif'],
-        },
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    extend: {
+      fontFamily: {
+        inter: ["'Inter'", "sans-serif"],
+        josefin: ["'Josefin Sans'", "sans-serif"],
       },
     },
-    plugins: [],
-  };
-  
+  },
+  plugins: [],
+};
