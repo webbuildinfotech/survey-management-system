@@ -58,7 +58,7 @@ const RightSidebar = () => {
 
         <div className="p-5">
           <p className="text-xs text-gray-500 mb-3">388 votes</p>
-   
+
           <form className="space-y-2 mb-4 p-2">
             {[
               "Electric Car",
