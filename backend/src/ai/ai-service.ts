@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import axios from 'axios';
-import { BusinessEntity } from 'business/business.entity';
+import { BusinessEntity } from '../business/business.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
