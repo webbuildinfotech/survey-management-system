@@ -2,10 +2,32 @@
   color: #1d9bf0;
 }
 
+.text-secondary {
+  color: #fcfbf3;
+}
+.text-color-grey{
+  color:#888888
+}
+
+.text-color-black{
+  color:#222222
+}
+
+.bg-profile{
+  background: #D9D9D9;
+}
+.bg-color-black {
+  background: #222222;
+}
+
 .text-color {
   color: #6a6a6a;
 }
 
-.bg-twitter-blue{
-    background: #1d9bf0;
+.bg-twitter-blue {
+  background: #1d9bf0;
+}
+
+.outfit-font {
+  font-family: 'Outfit', sans-serif;
 }

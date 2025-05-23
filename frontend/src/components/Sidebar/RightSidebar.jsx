@@ -16,17 +16,22 @@ const RightSidebar = () => {
     <div className="w-full flex flex-col p-4 h-full min-h-screen">
       {/* Suggestions */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">You might like</h2>
+        <p className="text-[18px] font-medium mb-4">You might like</p>
         {suggestions.map((user, index) => (
-          <div key={index} className="flex items-center justify-between mb-4">
+          <div key={index} className="flex items-center justify-between mb-5">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+              <div className="w-13 h-13 bg-profile rounded-full"></div>
               <div>
-                <p className="text-sm font-medium">{user.name}</p>
-                <p className="text-xs text-gray-500">{user.username}</p>
+                <p className="text-base font-normal outfit-font">{user.name}</p>
+                <p className="text-sm font-normal text-color-grey outfit-font">
+                  {user.username}
+                </p>
               </div>
             </div>
-            <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded-full">
+            <button
+              className="bg-twitter-blue outfit-font text-white text-xs font-medium px-3 py-2 rounded-full"
+              
+            >
               Follow
             </button>
           </div>
@@ -35,29 +40,28 @@ const RightSidebar = () => {
 
       {/* Polls */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">Trending Polls</h2>
+        <h2 className="text-[18px] font-medium mb-4 mt-5">Trending Polls</h2>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
             <div>
-              <p className="text-sm font-medium">themohanreviews</p>
-              <p className="text-xs text-gray-500">
-                #survey #cars #orderedchips
+              <p  className="text-xs font-normal outfit-font">themohanreviews</p>
+              <p className="text-[12px] text-color-grey">
+              #survey #cars  #cardealerships
               </p>
             </div>
           </div>
-          <button className="border border-blue-500 text-blue-500 text-sm px-3 py-1 rounded-full">
+          <button className="border border-text-twitter-blue text-twitter-blue text-sm px-3 py-1 rounded-full">
             Following
           </button>
         </div>
 
-        <div className="text-sm text-gray-700 mb-2">
-          If you'll were in the market to buy a car for commute, what kind of
-          car would you go for?
+        <div  className="outfit-font text-xs font-medium text-color-black mb-2">
+        If ya’ll were in the market to buy a car for commute, what kind of car would you go for?
         </div>
 
         <div className="p-5">
-          <p className="text-xs text-gray-500 mb-3">388 votes</p>
+          <p className="text-xs font-normal mb-3 outfit-font">388 votes</p>
 
           <form className="space-y-2 mb-4 p-2">
             {[
@@ -77,12 +81,12 @@ const RightSidebar = () => {
                   onChange={() => handleOptionChange(option)}
                   className="accent-blue-500"
                 />
-                <span>{option}</span>
+                <span className="font-medium text-xs outfit-font">{option}</span>
               </label>
             ))}
           </form>
 
-          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-full text-sm font-semibold">
+          <button className="w-full outfit-font bg-twitter-blue p-2  text-white  rounded-full text-xs font-medium">
             Vote
           </button>
         </div>

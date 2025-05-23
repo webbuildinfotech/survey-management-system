@@ -14,27 +14,27 @@ const LeftSidebar = () => {
     {
       name: "Home",
       path: RoutePaths.HOME,
-      icon: <GoHome className="text-2xl" />,
+      icon: <GoHome className="size-8" />,
     },
     {
       name: "Search",
       path: "/search",
-      icon: <MdSearch className="text-2xl" />,
+      icon: <MdSearch className="size-8" />,
     },
     {
       name: "Create",
       path: "/create",
-      icon: <LuSquarePlus className="text-2xl" />,
+      icon: <LuSquarePlus className="size-8" />,
     },
     {
       name: "Answers",
       path: "/answers",
-      icon: <RiChatPollLine className="text-2xl" />,
+      icon: <RiChatPollLine className="size-8" />,
     },
     {
       name: "Profile",
       path: RoutePaths.PROFILE,
-      icon: <HiOutlineUser className="text-2xl" />,
+      icon: <HiOutlineUser className="size-8" />,
     },
   ];
 
@@ -42,9 +42,9 @@ const LeftSidebar = () => {
   const currentPath = window.location.pathname;
 
   return (
-    <div className="w-16 xl:w-100 flex flex-col  xl:pl-32 pb-10 p-4 h-full min-h-screen justify-between">
+    <div className="w-16 xl:w-100 flex flex-col xl:pl-32 pb-10 p-4 h-full min-h-screen justify-between">
       <div>
-        <div className="text-3xl font-bold text-blue-500 mb-20 hidden xl:block">
+        <div className="text-3xl font-bold text-twitter-blue mb-20 hidden xl:block">
           Griterr
         </div>
         <nav>
@@ -60,7 +60,7 @@ const LeftSidebar = () => {
                   }`}
                 >
                   <span className="xl:mr-4">{item.icon}</span>
-                  <span className="hidden xl:block">{item.name}</span>
+                  <span className="hidden xl:block text-2xl font-medium">{item.name}</span>
                 </Link>
               </li>
             ))}
@@ -73,9 +73,9 @@ const LeftSidebar = () => {
           className="flex items-center text-gray-700 hover:text-blue-600 px-2 py-2 rounded-lg"
         >
           <span className="xl:mr-4">
-            <LiaCogSolid className="text-2xl" />
+            <LiaCogSolid className="size-8" />
           </span>
-          <span className="hidden xl:block">Settings</span>
+          <span className="hidden xl:block text-2xl font-medium">Settings</span>
         </Link>
       </div>
     </div>
