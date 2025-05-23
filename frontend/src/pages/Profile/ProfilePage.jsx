@@ -9,7 +9,6 @@ import {
   FaFolderOpen,
 } from "react-icons/fa";
 import { MdPoll } from "react-icons/md";
-
 import { TiThMenuOutline } from "react-icons/ti";
 import { CgMenuLeft } from "react-icons/cg";
 import { CiBookmark } from "react-icons/ci";
@@ -44,11 +43,11 @@ const ProfilePage = () => {
   return (
     <main className="bg-white min-h-screen font-sans antialiased">
       {/* Cover Photo */}
-      <div className="relative w-full h-56 md:h-64 bg-gray-200">
+      <div className="relative w-full h-56 md:h-64">
         <img
           src={food}
           alt="cover"
-          className="w-full h-full object-cover rounded-b-xl"
+          className="w-full h-full object-cover rounded-2xl max-md:rounded-none"
         />
         {/* <div className="absolute left-8 bottom-[-56px]"> Profile Image */}
 

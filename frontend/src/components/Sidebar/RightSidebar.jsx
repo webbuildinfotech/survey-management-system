@@ -38,7 +38,7 @@ const RightSidebar = () => {
         <h2 className="text-lg font-semibold mb-4">Trending Polls</h2>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
+            <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
             <div>
               <p className="text-sm font-medium">themohanreviews</p>
               <p className="text-xs text-gray-500">
@@ -56,11 +56,15 @@ const RightSidebar = () => {
           car would you go for?
         </div>
 
-        <p className="text-xs text-gray-500 mb-3">388 votes</p>
-
-        <form className="space-y-2 mb-4">
-          {["Electric Car", "Used IC Car", "Public Transport is the best!"].map(
-            (option) => (
+        <div className="p-5">
+          <p className="text-xs text-gray-500 mb-3">388 votes</p>
+   
+          <form className="space-y-2 mb-4 p-2">
+            {[
+              "Electric Car",
+              "Used IC Car",
+              "Public Transport is the best!",
+            ].map((option) => (
               <label
                 key={option}
                 className="flex items-center space-x-2 cursor-pointer"
@@ -75,13 +79,13 @@ const RightSidebar = () => {
                 />
                 <span>{option}</span>
               </label>
-            )
-          )}
-        </form>
+            ))}
+          </form>
 
-        <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-full text-sm font-semibold">
-          Vote
-        </button>
+          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-full text-sm font-semibold">
+            Vote
+          </button>
+        </div>
       </div>
     </div>
   );

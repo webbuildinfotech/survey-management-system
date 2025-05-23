@@ -1,61 +1,62 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 import LeftSidebar from "../components/Sidebar/LeftSidebar";
 import RightSidebar from "../components/Sidebar/RightSidebar";
-import { NavLink } from "react-router-dom";
+import { MdNavigateBefore } from "react-icons/md";
+
 import {
   HiHome,
   HiSearch,
   HiPlusCircle,
   HiChatAlt2,
   HiUser,
-  HiArrowNarrowLeft,
-  HiBell,
 } from "react-icons/hi";
-// import Header from "../components/Header.jsx"; // Commented out as per image
-// import Footer from "../components/Footer.jsx"; // Commented out as per image
-
-// import RightSidebar from "../components/RightSidebar";
-// import BottomNav from "../components/BottomNav";
-
+import { LuBell } from "react-icons/lu";
 const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Optional Header could go here if you need a top bar */}
-      <div className="sticky top-0 z-30 bg-white h-10 flex items-center">
-        {/* Mobile: left arrow and bell */}
-        <div className="flex w-full md:hidden justify-between px-4">
-          <HiArrowNarrowLeft className="text-2xl cursor-pointer" />
-          <span className="font-medium text-md">@themohanreviews</span>
-          <HiBell className="text-2xl cursor-pointer" />
-        </div>
-        {/* Desktop: centered username */}
-        <div className="hidden md:flex w-full justify-center">
-          <div className="flex items-center">
-            <HiArrowNarrowLeft className="text-2xl cursor-pointer" />
-            <span className="ml-2 font-medium text-md">@themohanreviews</span>
-          </div>
-        </div>
-      </div>
+      {/* Mobile Header */}
+      <div className="sticky top-0 z-30 bg-white h-10 flex items-center md:hidden py-8">
+  <ul className="flex w-full justify-between items-center list-none px-4">
+    <li className="cursor-pointer">
+      <MdNavigateBefore size={40} />
+    </li>
+    <li className="font-medium text-md">@themohanreviews</li>
+    <li className="text-2xl cursor-pointer">
+      <LuBell />
+    </li>
+  </ul>
+</div>
+
+
       {/* Main content area with sidebars */}
       <main className="flex flex-1">
-        {/* Left Sidebar - Fixed position on medium screens and up */}
+        {/* Left Sidebar - Fixed on medium and up */}
         <div className="hidden md:block fixed left-0 top-0 h-screen w-100 p-5 border-r-none">
           <LeftSidebar />
         </div>
 
-        {/* Main Content Area - With margin to account for fixed sidebars */}
+        {/* Main Content Area */}
         <div className="flex-1 pb-16 md:pb-0 md:ml-100 md:mr-100">
+          {/* Desktop Header (moved here) */}
+          <div className="hidden md:flex w-full justify-start pb-2 bg-white">
+            <div className="flex items-center">
+              <MdNavigateBefore className="cursor-pointer" size={40} />
+              <span className="ml-2 font-medium text-md">@themohanreviews</span>
+            </div>
+          </div>
+
+          {/* Routed Page Content */}
           <Outlet />
         </div>
 
-        {/* Right Sidebar - Fixed position on medium screens and up */}
+        {/* Right Sidebar - Fixed on medium and up */}
         <div className="hidden md:block fixed right-0 top-0 h-screen w-100 p-5 border-l-none overflow-y-auto">
           <RightSidebar />
         </div>
       </main>
 
-      {/* Bottom Navigation - Visible on small screens, hidden on medium screens and up */}
+      {/* Bottom Navigation - Only on mobile */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-0 md:hidden z-50">
         <nav className="flex justify-between">
           <NavLink to="/" className="flex-1 flex flex-col items-center py-2">
@@ -92,8 +93,6 @@ const MainLayout = () => {
           </NavLink>
         </nav>
       </div>
-
-      {/* Optional Footer could go here if needed below the main content */}
     </div>
   );
 };
