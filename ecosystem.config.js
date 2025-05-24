@@ -16,11 +16,11 @@ module.exports = {
     {
       name: "frontend",
       cwd: "./frontend",
-      // If you have a static build, use 'serve' to host it:
-      script: "npx",
+      script: "npm",
       args: "npm run dev",
       env: {
-        NODE_ENV: "production"
+        NODE_ENV: "production",
+        PORT: 5173 
       }
     }
   ]
