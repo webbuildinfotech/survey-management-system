@@ -5,7 +5,7 @@ module.exports = {
       name: "backend",
       cwd: "./backend",
       script: "npm",
-      args: "run start",       // or "run start:prod", or point directly to dist/index.js
+      args: "npm run start --dev",       // or "run start:prod", or point directly to dist/index.js
       env: {
         NODE_ENV: "production",
         PORT: 4000             // or whatever port your API listens on
@@ -18,7 +18,7 @@ module.exports = {
       cwd: "./frontend",
       // If you have a static build, use 'serve' to host it:
       script: "npx",
-      args: "serve -s build -l 3000",
+      args: "npm run dev",
       env: {
         NODE_ENV: "production"
       }
