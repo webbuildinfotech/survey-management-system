@@ -1,5 +1,6 @@
 // src/roles/role.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, HttpStatus, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { RoleSeedService } from './role.seed';
 import { CreateRoleDto, UpdateRoleDto } from './roles.dto';
 
@@ -9,20 +10,31 @@ export class RoleController {
 
   // Get all roles
   @Get()
-  async getAllRoles() {
-    return this.roleService.getAllRoles();
+  async getAllRoles(@Res() response: Response) {
+    const roles = await this.roleService.getAllRoles();
+    return response.status(HttpStatus.OK).json({
+      length: roles.length,
+      data: roles,
+    });
   }
 
   // Get a single role by ID
   @Get(':id')
-  async getRoleById(@Param('id') id: string) {
-    return this.roleService.getRoleById(id);
+  async getRoleById(@Param('id') id: string, @Res() response: Response) {
+    const role = await this.roleService.getRoleById(id);
+    return response.status(HttpStatus.OK).json({
+      data: role,
+    });
   }
 
   // Create a new role
-  @Post('')
-  async createRole(@Body() createRoleDto: CreateRoleDto) {
-    return this.roleService.createRole(createRoleDto);
+  @Post()
+  async createRole(@Body() createRoleDto: CreateRoleDto, @Res() response: Response) {
+    const role = await this.roleService.createRole(createRoleDto);
+    return response.status(HttpStatus.CREATED).json({
+      message: 'Role created successfully',
+      data: role,
+    });
   }
 
   // Update a role by ID
@@ -30,14 +42,21 @@ export class RoleController {
   async updateRole(
     @Param('id') id: string,
     @Body() updateRoleDto: UpdateRoleDto,
+    @Res() response: Response,
   ) {
-    return this.roleService.updateRole(id, updateRoleDto);
+    const role = await this.roleService.updateRole(id, updateRoleDto);
+    return response.status(HttpStatus.OK).json({
+      message: 'Role updated successfully',
+      data: role,
+    });
   }
 
   // Delete a role by ID
   @Delete(':id')
-  async deleteRole(@Param('id') id: string) {
+  async deleteRole(@Param('id') id: string, @Res() response: Response) {
     await this.roleService.deleteRole(id);
-    return { message: 'Role deleted successfully' };
+    return response.status(HttpStatus.OK).json({
+      message: 'Role deleted successfully',
+    });
   }
 }

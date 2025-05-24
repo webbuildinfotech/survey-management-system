@@ -5,34 +5,35 @@ import {
   UnauthorizedException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserDto } from './../user/users.dto';
-import { UserEntity } from './../user/users.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { UserDto } from '../user/users.dto';
+import { User, UserDocument } from '../user/users.schema';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from '../service/email.service';
-import { RoleEntity } from '../roles/roles.entity';
-import { User } from '../constant/type';
+import { Role } from '../roles/roles.schema';
+import { User as UserType } from '../constant/type';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
 
-    @InjectRepository(RoleEntity)  // Inject RoleRepository
-    private readonly roleRepository: Repository<RoleEntity>,
+    @InjectModel(Role.name)
+    private roleModel: Model<Role>,
 
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
-  ) { }
+  ) {}
 
   private handleError(error: any): never {
     if (
       error instanceof BadRequestException ||
       error instanceof UnauthorizedException
     ) {
+  
       throw error;
     }
     throw new InternalServerErrorException(
@@ -40,16 +41,16 @@ export class AuthService {
     );
   }
 
-  private generateToken(user: UserEntity): string {
-
+  private generateToken(user: UserDocument): string {
     try {
       return this.jwtService.sign({
-        sub: user.id,
-        id: user.id,
+        sub: user._id,
+        id: user._id,
         email: user.email,
         role: user.role.name,
       });
     } catch (error) {
+      console.log(error)
       this.handleError(error);
     }
   }
@@ -59,11 +60,10 @@ export class AuthService {
   }
 
   // Register a new user
-  async register(userDto: UserDto): Promise<{ message: string; user: UserEntity }> {
-
+  async register(userDto: UserDto): Promise<{ message: string; user: UserDocument }> {
     try {
-      const existingUser = await this.userRepository.findOne({
-        where: [{ email: userDto.email }],
+      const existingUser = await this.userModel.findOne({
+        email: userDto.email,
       });
 
       if (existingUser) {
@@ -72,53 +72,53 @@ export class AuthService {
       if (!userDto.password) {
         throw new BadRequestException('Password is required');
       }
-      // Hash the password
+
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(userDto.password, saltRounds);
 
-    let role;
-    let roleId = userDto.roleId;
+      let role;
+      let roleId = userDto.roleId;
 
-    if (!roleId) {
-      // If no role ID is provided, default to 'User' role
-      role = await this.roleRepository.findOne({ where: { name: User } });
-      if (!role) {
-        throw new BadRequestException('Role "User" not found');
+      if (!roleId) {
+        role = await this.roleModel.findOne({ name: UserType });
+        if (!role) {
+          throw new BadRequestException('Role "User" not found');
+        }
+      } else {
+        role = await this.roleModel.findById(roleId);
+        if (!role) {
+          throw new BadRequestException('Role not found');
+        }
       }
-    } else {
-      // Otherwise, try to find the role by ID
-      role = await this.roleRepository.findOne({ where: { id: roleId } });
-      if (!role) {
-        throw new BadRequestException('Role not found');
-      }
-    }
 
-    // Create the new user with hashed password
-    const newUser = this.userRepository.create({
-      ...userDto,
-      password: hashedPassword,
-      role: role,  // Assign RoleEntity instead of roleId
-      isDeleted: false,
-    });
+      const newUser = new this.userModel({
+        name: userDto.name,
+        email: userDto.email,
+        password: hashedPassword,
+        city: userDto.city,
+        mobile: userDto.mobile,
+        role: role._id,
+        isDeleted: false,
+      });
 
-      await this.userRepository.save(newUser); // Save the new user
+      const savedUser = await newUser.save();
       return {
         message: 'Your account has been created successfully',
-        user: newUser,
+        user: savedUser,
       };
     } catch (error) {
-      console.log(error)
+      console.log(error);
       this.handleError(error);
     }
   }
 
   // Login a user
-  async login(userDto: UserDto): Promise<{ message: string; user: Partial<UserEntity>; token: string }> {
+  async login(userDto: UserDto): Promise<{ message: string; user: Partial<User>; token: string }> {
     try {
-      const user = await this.userRepository.findOne({
-        where: { email: userDto.email, isDeleted: false },
-        relations: ['role'], // This ensures the role is loaded along with the user
-      });
+      const user = await this.userModel
+        .findOne({ email: userDto.email, isDeleted: false })
+        .populate('role')
+        .exec();
 
       if (!user) {
         throw new UnauthorizedException('Invalid credentials');
@@ -141,7 +141,7 @@ export class AuthService {
 
       // Only return specific user fields
       const sanitizedUser = {
-        id: user.id,
+        id: user._id,
         name: user.name,
         email: user.email,
         mobile: user.mobile,
@@ -153,6 +153,7 @@ export class AuthService {
         token: token,
       };
     } catch (error) {
+      console.log(error)
       this.handleError(error);
     }
   }
@@ -161,23 +162,29 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<{ message: string }> {
     try {
-      const user = await this.userRepository.findOne({
-        where: { email, isDeleted: false }
+      const user = await this.userModel.findOne({
+        email,
+        isDeleted: false,
       });
 
       if (!user) {
         throw new BadRequestException('Email not found');
       }
 
-      // Generate OTP
       const otp = this.generateOTP();
+      const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
 
-      // Save OTP and expiry time (5 minutes)
-      user.otp = otp;
-      user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
-      await this.userRepository.save(user);
+      // Update using $set to ensure proper typing
+      await this.userModel.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            otp,
+            otpExpires,
+          },
+        },
+      );
 
-      // Send OTP via email
       await this.emailService.sendOTP(email, otp);
 
       return { message: 'OTP has been sent to your email' };
@@ -186,10 +193,15 @@ export class AuthService {
     }
   }
 
-  async verifyOtpAndResetPassword(email: string, otp: string, newPassword: string): Promise<{ message: string }> {
+  async verifyOtpAndResetPassword(
+    email: string,
+    otp: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
     try {
-      const user = await this.userRepository.findOne({
-        where: { email, isDeleted: false }
+      const user = await this.userModel.findOne({
+        email,
+        isDeleted: false,
       });
 
       if (!user || !user.otp || !user.otpExpires) {
@@ -204,20 +216,23 @@ export class AuthService {
         throw new BadRequestException('Invalid OTP');
       }
 
-      // Hash new password
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-      // Update password and clear OTP data
-      user.password = hashedPassword;
-      user.otp = null
-      user.otpExpires = null;
-      await this.userRepository.save(user);
+      // Update using $set to ensure proper typing
+      await this.userModel.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            password: hashedPassword,
+            otp: null,
+            otpExpires: null,
+          },
+        },
+      );
 
       return { message: 'Password reset successful' };
     } catch (error) {
       this.handleError(error);
     }
   }
-
-
 }

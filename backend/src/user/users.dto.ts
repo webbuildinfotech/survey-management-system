@@ -1,14 +1,10 @@
 //users.dto.ts
-import { IsUUID } from 'class-validator';
 import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsBoolean,
-  IsNumber,
   IsEmail,
-  IsEnum,
-  MinLength,
+  IsMongoId,
 } from 'class-validator';
 
 export class UserDto {
@@ -33,8 +29,8 @@ export class UserDto {
   city?: string;
 
   @IsOptional()
-  @IsUUID()
-  roleId?: string; // role as foreign key
+  @IsMongoId()
+  roleId?: string;
 
   @IsOptional()
   isDeleted?: boolean;
@@ -44,5 +40,4 @@ export class UserDto {
 
   @IsOptional()
   updatedAt?: Date;
-  role: any;
 }

@@ -1,32 +1,31 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import axios from 'axios';
-import { BusinessEntity } from '../business/business.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Business, BusinessDocument } from '../business/business.schema';
 
 const tokenHoggy = "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"
 
 @Injectable()
 export class AiService {
   constructor(
-
-    @InjectRepository(BusinessEntity)
-    private businessRepository: Repository<BusinessEntity>,
+    @InjectModel(Business.name)
+    private businessModel: Model<BusinessDocument>,
   ) {}
 
   private async getBusinessesTextForCity(city: string): Promise<string> {
     try {
-      const businesses = await this.businessRepository.find({
-        where: { city },
-        take: 20,
-      });
+      const businesses = await this.businessModel
+        .find({ g_city: city })
+        .limit(20)  
+        .exec();
 
       if (businesses.length === 0) {
         return 'No business information available for this city.';
       }
 
       const context = businesses
-        .map((business) => `${business.name} is a business in ${city}.`)
+        .map((business) => `${business.g_business_name} is a business in ${city}.`)
         .join(' ');
 
       return context;
@@ -39,7 +38,7 @@ export class AiService {
   async askQuestionForCity(city: string, question: string): Promise<string> {
     try {
       const API_URL = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
-      const token = tokenHoggy
+      const token = tokenHoggy;
 
       if (!token) {
         throw new Error('Hugging Face API token not found');

@@ -1,25 +1,27 @@
 // src/auth/auth.module.ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
-import * as dotenv from 'dotenv';
-import { UserEntity } from './../user/users.entity';
-import { EmailService } from './../service/email.service';
-import { RoleEntity } from '../roles/roles.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { User, UserSchema } from '../user/users.schema';
+import { EmailService } from '../service/email.service';
+import { Role, RoleSchema } from '../roles/roles.schema';
 
 
-dotenv.config(); // Load environment variables
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity,RoleEntity]),
-  JwtModule.register({
-    secret: process.env.JWT_SECRET, // Use your JWT secret from the .env file
-    signOptions: { }, // Set your token expiration
-  }),
-
-],
-  providers: [AuthService,EmailService],
+  imports: [
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Role.name, schema: RoleSchema }
+    ]),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET ,
+      signOptions: { expiresIn: '1d' },
+    }),
+  ],
+  providers: [AuthService, EmailService],
   controllers: [AuthController],
   exports: [AuthService],
 })

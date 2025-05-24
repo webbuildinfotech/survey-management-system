@@ -10,16 +10,13 @@ import {
     Put,
     Body,
     Req,
-    UnauthorizedException,
 } from '@nestjs/common';
 
 import { Request, Response } from 'express';
 import { UserService } from './users.service';
 import { JwtAuthGuard } from './../jwt/jwt-auth.guard';
 import { RolesGuard } from './../jwt/roles.guard';
-import { Roles } from './../jwt/roles.decorator';
-import { UserEntity } from './users.entity';
-import { Admin } from '../constant/type';
+import { User } from './users.schema';
 import { checkUserAdminAuthorization } from '../utils/auth.utils';
 
 @Controller('users')
@@ -28,7 +25,6 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Get('list')
-    // @Roles(Admin) // Only Admin role can access this route
     async getAllUsers(@Res() response: Response) {
         const users = await this.userService.getAll();
         return response.status(HttpStatus.OK).json({
@@ -37,12 +33,11 @@ export class UserController {
         });
     }
 
-
     @Get(':id')
     async getUserById(@Param('id') id: string,
         @Res() response: Response,
         @Req() request: Request) {
-        checkUserAdminAuthorization(request, id); // Now `userData` is guaranteed to be a string
+        checkUserAdminAuthorization(request, id);
         const user = await this.userService.getById(id);
         return response.status(HttpStatus.OK).json({
             data: user,
@@ -56,10 +51,9 @@ export class UserController {
     }
 
     @Put('update/:id')
-    // @Roles(UserRole.Admin)
     async updateUser(
         @Param('id') id: string,
-        @Body() updateData: Partial<UserEntity>,
+        @Body() updateData: Partial<User>,
         @Res() response: Response
     ) {
         const result = await this.userService.update(id, updateData);
@@ -68,5 +62,4 @@ export class UserController {
             data: result,
         });
     }
-
 }

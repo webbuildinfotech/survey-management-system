@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
+import { MongooseModule } from '@nestjs/mongoose';
 import { BusinessService } from './business.service';
-import { BusinessEntity } from './business.entity';
 import { BusinessController } from './business.controller';
+import { Business, BusinessSchema } from './business.schema';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BusinessEntity])],
+  imports: [
+    MongooseModule.forFeature([{ name: Business.name, schema: BusinessSchema }])
+  ],
   providers: [BusinessService],
   controllers: [BusinessController],
   exports: [BusinessService],

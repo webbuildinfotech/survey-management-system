@@ -1,70 +1,59 @@
 // src/roles/role.seed.ts
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { RoleEntity } from './roles.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Role } from './roles.schema';
 import { Admin, ContentAdmin, User } from '../constant/type';
 import { CreateRoleDto, UpdateRoleDto } from './roles.dto';
 
 @Injectable()
 export class RoleSeedService {
   constructor(
-    @InjectRepository(RoleEntity)
-    private roleRepo: Repository<RoleEntity>,
+    @InjectModel(Role.name)
+    private roleModel: Model<Role>,
   ) {}
 
   async seedRoles() {
     const roles = [Admin, ContentAdmin, User];
     for (const roleName of roles) {
-      const exists = await this.roleRepo.findOne({ where: { name: roleName } });
+      const exists = await this.roleModel.findOne({ name: roleName });
       if (!exists) {
-        const role = this.roleRepo.create({ name: roleName });
-        await this.roleRepo.save(role);
+        await this.roleModel.create({ name: roleName });
       }
     }
   }
-// Get all roles
-  async getAllRoles(): Promise<RoleEntity[]> {
-    return this.roleRepo.find();
+
+  async getAllRoles(): Promise<Role[]> {
+    return this.roleModel.find().exec();
   }
 
-  // Create a new role (Optional)
-  async createRole(createRoleDto: CreateRoleDto): Promise<RoleEntity> {
-    const role = this.roleRepo.create(createRoleDto);
-    return this.roleRepo.save(role);
+  async createRole(createRoleDto: CreateRoleDto): Promise<Role> {
+    const role = new this.roleModel(createRoleDto);
+    return role.save();
   }
 
-  // Delete a role by ID
   async deleteRole(id: string): Promise<void> {
-    await this.roleRepo.delete(id);
+    const result = await this.roleModel.deleteOne({ _id: id });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException('Role not found');
+    }
   }
 
-   // Get a single role by ID
-  async getRoleById(id: string): Promise<RoleEntity> {
-    const role = await this.roleRepo.findOne({
-      where: { id }, // Correct query to find by ID
-    });
-
+  async getRoleById(id: string): Promise<Role> {
+    const role = await this.roleModel.findById(id).exec();
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundException('Role not found');
     }
     return role;
   }
 
-
-  // Update a role by ID
-  async updateRole(id: string, updateRoleDto: UpdateRoleDto): Promise<RoleEntity> {
-    const role = await this.roleRepo.findOne({
-      where: { id }, // Correct query to find by ID
-    });
-
+  async updateRole(id: string, updateRoleDto: UpdateRoleDto): Promise<Role> {
+    const role = await this.roleModel.findById(id).exec();
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundException('Role not found');
     }
 
     role.name = updateRoleDto.name;
-    return this.roleRepo.save(role);
+    return role.save();
   }
-
-
 }

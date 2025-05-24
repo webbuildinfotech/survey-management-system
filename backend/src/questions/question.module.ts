@@ -1,23 +1,27 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { QuestionsController } from './question.controller';
 import { QuestionsService } from './question.service';
-import { Question } from './question.entity';
-
+import { Question, QuestionSchema } from './question.schema';
+import { Survey, SurveySchema } from '../surveys/survey.schema';
+import { Vote, VoteSchema } from '../votes/vote.schema';
+import { Business, BusinessSchema } from '../business/business.schema';
+import { User, UserSchema } from '../user/users.schema';
 import { AiModule } from '../ai/ai.module';
-import { Survey } from 'surveys/survey.entity';
-import { Vote } from 'votes/vote.entity';
-import { BusinessEntity } from 'business/business.entity';
-import { UserEntity } from 'user/users.entity';
-import { QuestionBusiness } from './entities/question-business.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Question, Survey, Vote, BusinessEntity, UserEntity, QuestionBusiness]),
-    AiModule,
+    MongooseModule.forFeature([
+      { name: Question.name, schema: QuestionSchema },
+      { name: Survey.name, schema: SurveySchema },
+      { name: Vote.name, schema: VoteSchema },
+      { name: Business.name, schema: BusinessSchema },
+      { name: User.name, schema: UserSchema }
+    ]),
+    AiModule
   ],
   controllers: [QuestionsController],
   providers: [QuestionsService],
-  exports: [QuestionsService],
+  exports: [QuestionsService]
 })
 export class QuestionsModule {}
