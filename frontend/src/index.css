@@ -4,9 +4,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap");
 
 
-/* ❌ Remove this if you're not using Josefin Sans, or leave it if you need both */
-@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap");
-
 /* ✅ Import Tailwind after font imports */
 @import "tailwindcss";
 
@@ -15,6 +12,10 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-:root {
-  --container-xs: 16rem;
+.outfit-font {
+  font-family: 'Outfit', sans-serif;
 }
+
+/* :root {
+  --container-xs: 16rem;
+} */

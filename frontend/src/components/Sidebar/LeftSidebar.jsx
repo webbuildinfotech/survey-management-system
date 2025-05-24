@@ -1,4 +1,5 @@
-// frontend/src/components/LeftSidebar.jsx
+//LeftSidebar.jsx 
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { RoutePaths } from "../../routes/Path";
@@ -44,7 +45,7 @@ const LeftSidebar = () => {
   return (
     <div className="w-16 xl:w-100 flex flex-col xl:pl-32 pb-10 p-4 h-full min-h-screen justify-between">
       <div>
-        <div className="text-3xl font-bold text-twitter-blue mb-20 hidden xl:block">
+        <div className="text-3xl font-bold text-primary mb-20 hidden xl:block">
           Griterr
         </div>
         <nav>

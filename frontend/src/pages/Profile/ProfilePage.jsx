@@ -1,38 +1,17 @@
 import React, { useState } from "react";
 import { FaStar } from "react-icons/fa";
-import { MdPoll } from "react-icons/md";
-import { TiThMenuOutline } from "react-icons/ti";
-import { CgMenuLeft } from "react-icons/cg";
-import { CiBookmark } from "react-icons/ci";
+
 import profile from "../../assets/profile.png";
 import food from "../../assets/bg.png";
 import post from "../../assets/post.png";
 import { BsPatchCheckFill } from "react-icons/bs";
 import { CiMenuKebab } from "react-icons/ci";
 import { HiOutlineLocationMarker } from "react-icons/hi";
-import { SlUserFollowing } from "react-icons/sl";
+import { Tabs } from "../../components/Tabs/Tab";
+import TabsComponent from "../../components/Tabs/ActiveTabs";
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Activity");
-
-  const tabs = [
-    {
-      name: "Activity",
-      icon: <TiThMenuOutline className="max-sm:text-2xl" size={26} />,
-    },
-    {
-      name: "Polls",
-      icon: <CgMenuLeft className="max-sm:text-2xl" size={26} />,
-    },
-    {
-      name: "Tagged",
-      icon: <SlUserFollowing className="max-sm:text-2xl" size={26} />,
-    },
-    {
-      name: "Collection",
-      icon: <CiBookmark className="max-sm:text-2xl" size={26} />,
-    },
-  ];
 
   return (
     <main className="bg-white min-h-screen font-sans antialiased">
@@ -82,7 +61,7 @@ const ProfilePage = () => {
             <div className="flex items-center gap-2 justify-center md:justify-start">
               <h1 className="text-2xl font-medium">Mohan Sharma</h1>
               <BsPatchCheckFill
-                className="text-twitter-blue size-8"
+                className="text-primary size-8"
                 title="Verified"
               />
             </div>
@@ -95,7 +74,7 @@ const ProfilePage = () => {
           <div className="order-3 md:order-2 pt-10 max-md:pt-1 flex justify-center md:block">
             <button
               className="bg-black max-md:bg-white max-md:text-[#1d9bf0] text-white 
-            px-6 py-2 rounded-2xl font-medium  max-md:border max-md:border-text-twitter-blue text-xs outfit-font"
+            px-6 py-2 rounded-2xl font-medium  max-md:border max-md:border-text-primary text-xs outfit-font"
             >
               Edit Profile
             </button>
@@ -130,31 +109,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-14 mt-8 max-md:mt-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.name}
-              onClick={() => setActiveTab(tab.name)}
-              className={`flex items-center gap-2 py-2 px-1 text-sm font-medium border-b-2 transition-all
-                  ${
-                    activeTab === tab.name
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-400 hover:text-blue-500"
-                  }
-                `}
-            >
-              <span
-                className={`size-6
-          ${activeTab === tab.name ? "text-blue-500" : "text-gray-400"}`}
-              >
-                {tab.icon}
-              </span>
-              <span className="max-sm:hidden font-semibold text-base">
-                {tab.name}
-              </span>
-            </button>
-          ))}
-        </div>
+        <TabsComponent tabs={Tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Activity Section (Sample Post) */}
         {activeTab === "Activity" && (
@@ -173,7 +128,7 @@ const ProfilePage = () => {
                     themohanreviews
                   </span>
                   <BsPatchCheckFill
-                    className="text-twitter-blue size-4 block md:hidden" // Adjust size if needed
+                    className="text-primary size-4 block md:hidden" // Adjust size if needed
                     title="Verified"
                   />
                 </div>

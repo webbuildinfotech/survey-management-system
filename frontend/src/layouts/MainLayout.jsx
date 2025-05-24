@@ -30,7 +30,7 @@ const MainLayout = () => {
         <div className="flex w-full justify-between items-center list-none px-4">
           <div className="flex items-center">
             <FiMenu className="cursor-pointer size-8" />
-            <div className="ml-4 text-3xl font-bold text-twitter-blue">
+            <div className="ml-4 text-3xl font-bold text-primary">
               Griterr
             </div>
           </div>

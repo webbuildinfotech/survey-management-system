@@ -4,6 +4,8 @@ import { BusinessEntity } from '../business/business.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+const tokenHoggy = "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"
+
 @Injectable()
 export class AiService {
   constructor(
@@ -37,7 +39,7 @@ export class AiService {
   async askQuestionForCity(city: string, question: string): Promise<string> {
     try {
       const API_URL = 'https://api-inference.huggingface.co/models/facebook/bart-large-cnn';
-      const token = process.env.HUGGINGFACE_API_KEY
+      const token = tokenHoggy
 
       if (!token) {
         throw new Error('Hugging Face API token not found');

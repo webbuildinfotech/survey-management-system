@@ -11,7 +11,7 @@ const Header = () => {
         <Link
           to="/"
           style={{ fontFamily: "'Josefin Sans', sans-serif" }}
-          className="text-3xl font-bold text-twitter-blue "
+          className="text-3xl font-bold text-primary "
         >
           Griterr
         </Link>

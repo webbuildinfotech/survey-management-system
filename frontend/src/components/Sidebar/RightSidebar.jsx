@@ -29,7 +29,7 @@ const RightSidebar = () => {
               </div>
             </div>
             <button
-              className="bg-twitter-blue outfit-font text-white text-xs font-medium px-3 py-2 rounded-full"
+              className="bg-primary outfit-font text-white text-xs font-medium px-3 py-2 rounded-full"
               
             >
               Follow
@@ -51,7 +51,7 @@ const RightSidebar = () => {
               </p>
             </div>
           </div>
-          <button className="border border-text-twitter-blue text-twitter-blue text-sm px-3 py-1 rounded-full">
+          <button className="border border-text-primary text-primary text-sm px-3 py-1 rounded-full">
             Following
           </button>
         </div>
@@ -86,7 +86,7 @@ const RightSidebar = () => {
             ))}
           </form>
 
-          <button className="w-full outfit-font bg-twitter-blue p-2  text-white  rounded-full text-xs font-medium">
+          <button className="w-full outfit-font bg-primary p-2  text-white  rounded-full text-xs font-medium">
             Vote
           </button>
         </div>
