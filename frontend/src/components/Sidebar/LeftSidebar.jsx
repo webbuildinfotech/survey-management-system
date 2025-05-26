@@ -10,7 +10,7 @@ import { RiChatPollLine } from "react-icons/ri";
 import { HiOutlineUser } from "react-icons/hi";
 import { LiaCogSolid } from "react-icons/lia";
 
-const LeftSidebar = () => {
+const LeftSidebar = ({ isCollapsed }) => {
   const navItems = [
     {
       name: "Home",
@@ -43,9 +43,13 @@ const LeftSidebar = () => {
   const currentPath = window.location.pathname;
 
   return (
-    <div className="w-16 xl:w-100 flex flex-col xl:pl-32 pb-10 p-4 h-full min-h-screen justify-between">
+    <div className={`w-16 ${!isCollapsed ? 'xl:w-100' : ''} flex flex-col ${
+      !isCollapsed ? 'xl:pl-32 py-12' : ''
+    } pb-10 ${!isCollapsed ? 'p-4' : 'p-0' } h-full min-h-screen justify-between`}>
       <div>
-        <div className="text-3xl font-bold text-primary mb-20 hidden xl:block">
+        <div className={`text-3xl font-bold text-primary mb-20 ${
+          isCollapsed ? 'hidden' : 'hidden xl:block'
+        }`}>
           Griterr
         </div>
         <nav>
@@ -60,8 +64,10 @@ const LeftSidebar = () => {
                       : "text-gray-700 hover:text-blue-600"
                   }`}
                 >
-                  <span className="xl:mr-4">{item.icon}</span>
-                  <span className="hidden xl:block text-2xl font-medium">{item.name}</span>
+                  <span className={!isCollapsed ? 'xl:mr-4' : ''}>{item.icon}</span>
+                  <span className={`${
+                    isCollapsed ? 'hidden' : 'hidden xl:block'
+                  } text-2xl font-medium`}>{item.name}</span>
                 </Link>
               </li>
             ))}
@@ -73,10 +79,12 @@ const LeftSidebar = () => {
           to="/settings"
           className="flex items-center text-gray-700 hover:text-blue-600 px-2 py-2 rounded-lg"
         >
-          <span className="xl:mr-4">
+          <span className={!isCollapsed ? 'xl:mr-4' : ''}>
             <LiaCogSolid className="size-8" />
           </span>
-          <span className="hidden xl:block text-2xl font-medium">Settings</span>
+          <span className={`${
+            isCollapsed ? 'hidden' : 'hidden xl:block'
+          } text-2xl font-medium`}>Settings</span>
         </Link>
       </div>
     </div>
