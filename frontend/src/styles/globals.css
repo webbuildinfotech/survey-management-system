@@ -15,6 +15,9 @@
   color:#222222
 }
 
+.text-color {
+  color: #6a6a6a;
+}
 
 /* Background */
 
@@ -25,12 +28,17 @@
   background: #222222;
 }
 
-.text-color {
-  color: #6a6a6a;
-}
+.bg-color-white {
+  background: #FFFFFF;
+} 
 
 .bg-primary {
   background: #1d9bf0;
 }
 
 
+/* Box shadow */
+
+.custom-shadow {
+  box-shadow: 5px 10px #aa2f2f;
+}

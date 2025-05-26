@@ -1,4 +1,4 @@
-//LeftSidebar.jsx 
+//LeftSidebar.jsx
 
 import React from "react";
 import { Link } from "react-router-dom";
@@ -43,13 +43,17 @@ const LeftSidebar = ({ isCollapsed }) => {
   const currentPath = window.location.pathname;
 
   return (
-    <div className={`w-16 ${!isCollapsed ? 'xl:w-100' : ''} flex flex-col ${
-      !isCollapsed ? 'xl:pl-32 py-12' : ''
-    } pb-10 ${!isCollapsed ? 'p-4' : 'p-0' } h-full min-h-screen justify-between`}>
+    <div
+      className={`w-16 ${!isCollapsed ? "xl:w-100" : ""} flex flex-col ${
+        !isCollapsed ? "xl:pl-32 py-12" : ""
+      } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen justify-between`}
+    >
       <div>
-        <div className={`text-3xl font-bold text-primary mb-20 ${
-          isCollapsed ? 'hidden' : 'hidden xl:block'
-        }`}>
+        <div
+          className={`text-3xl font-bold text-primary mb-20 ${
+            isCollapsed ? "hidden" : "hidden xl:block"
+          }`}
+        >
           Griterr
         </div>
         <nav>
@@ -64,10 +68,16 @@ const LeftSidebar = ({ isCollapsed }) => {
                       : "text-gray-700 hover:text-blue-600"
                   }`}
                 >
-                  <span className={!isCollapsed ? 'xl:mr-4' : ''}>{item.icon}</span>
-                  <span className={`${
-                    isCollapsed ? 'hidden' : 'hidden xl:block'
-                  } text-2xl font-medium`}>{item.name}</span>
+                  <span className={!isCollapsed ? "xl:mr-4" : ""}>
+                    {item.icon}
+                  </span>
+                  <span
+                    className={`${
+                      isCollapsed ? "hidden" : "hidden xl:block"
+                    } text-2xl font-medium`}
+                  >
+                    {item.name}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -79,12 +89,16 @@ const LeftSidebar = ({ isCollapsed }) => {
           to="/settings"
           className="flex items-center text-gray-700 hover:text-blue-600 px-2 py-2 rounded-lg"
         >
-          <span className={!isCollapsed ? 'xl:mr-4' : ''}>
+          <span className={!isCollapsed ? "xl:mr-4" : ""}>
             <LiaCogSolid className="size-8" />
           </span>
-          <span className={`${
-            isCollapsed ? 'hidden' : 'hidden xl:block'
-          } text-2xl font-medium`}>Settings</span>
+          <span
+            className={`${
+              isCollapsed ? "hidden" : "hidden xl:block"
+            } text-2xl font-medium`}
+          >
+            Settings
+          </span>
         </Link>
       </div>
     </div>

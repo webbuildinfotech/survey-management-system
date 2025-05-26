@@ -11,7 +11,8 @@ import { RiChatPollLine } from "react-icons/ri";
 import { HiOutlineUser } from "react-icons/hi";
 import { FiMenu } from "react-icons/fi";
 import { LuBell } from "react-icons/lu";
-
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+import { BsSearch } from "react-icons/bs";
 const MainLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -39,7 +40,7 @@ const MainLayout = () => {
           {/* For Static position header */}
           {/* <div className="md:hidden flex justify-between items-center p-4 bg-white"> */}
 
-          {/* For fixed position header */}
+          {/* For fixed position header OWn Profile*/}
           <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-4 bg-white shadow-md">
             <div className="flex items-center">
               <FiMenu className="cursor-pointer size-8" />
@@ -49,6 +50,22 @@ const MainLayout = () => {
             </div>
             <span className="cursor-pointer size-6">
               <LuBell className="size-6" />
+            </span>
+          </div>
+
+          {/* For fixed position header Public Profile*/}
+          <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-4 bg-white">
+            <div className="flex items-center">
+              <MdNavigateBefore
+                className="cursor-pointer size-8"
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              />
+              <span className="ml-2 font-medium text-base">
+                @themohanreviews
+              </span>
+            </div>
+            <span className="cursor-pointer text-color-grey">
+              <PiDotsThreeOutlineVerticalFill className="size-6" />
             </span>
           </div>
 
@@ -86,8 +103,13 @@ const MainLayout = () => {
       </main>
 
       {/* Bottom Navigation - Only on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#FFFFFF] rounded-t-2xl p-0 md:hidden z-50">
-        <nav className="flex justify-between shadow-2xl border-t-0 border-t-black">
+      {/* <div className="fixed bottom-0 left-0 right-0 bg-color-white rounded-t-3xl p-0 md:hidden z-50"> */}
+      {/* <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl px-0 py-1 z-50 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)]"> */}
+      {/* <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl px-0 py-1 z-50 shadow-[0_-4px_30px_rgba(255,255,255,0.6),0_-2px_10px_rgba(0,0,0,0.1)] backdrop-black-md">
+       */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl  md:hidden z-50 px-0 py-1 shadow-[0_-4px_15px_rgba(0,0,0,0.30)]">
+
+        <nav className="flex justify-between">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -107,7 +129,7 @@ const MainLayout = () => {
                 : "flex-1 flex flex-col items-center py-2"
             }
           >
-            <MdSearch className="size-6" />
+            <BsSearch className="size-6" />
             <span className="text-sm">Search</span>
           </NavLink>
           <NavLink

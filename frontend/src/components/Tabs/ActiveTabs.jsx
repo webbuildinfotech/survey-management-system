@@ -1,10 +1,16 @@
 // src/components/Tabs/Tabs.jsx
 import React from "react";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 const TabsComponent = ({ tabs, activeTab, setActiveTab }) => {
+
+  const isMobile = useIsMobile();
+
+
   return (
     <div className="flex items-center gap-14 mt-8 max-md:mt-2">
-      {tabs.map((tab) => (
+        {tabs.filter(tab => (!isMobile && tab.name !== "Tag") || (isMobile && tab.name !== "Tagged")).map((tab, index) => (
+
         <button
           key={tab.name}
           onClick={() => setActiveTab(tab.name)}

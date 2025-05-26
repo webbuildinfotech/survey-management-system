@@ -5,11 +5,12 @@ import profile from "../../assets/profile.png";
 import food from "../../assets/bg.png";
 import post from "../../assets/post.png";
 import { BsPatchCheckFill } from "react-icons/bs";
-import { CiMenuKebab } from "react-icons/ci";
+import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+
 import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Tabs } from "../../components/Tabs/Tab";
 import TabsComponent from "../../components/Tabs/ActiveTabs";
-
+import { ImMenu } from "react-icons/im";
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Activity");
 
@@ -109,7 +110,11 @@ const ProfilePage = () => {
         </div>
 
         {/* Tabs */}
-        <TabsComponent tabs={Tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <TabsComponent
+          tabs={Tabs}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
 
         {/* Activity Section (Sample Post) */}
         {activeTab === "Activity" && (
@@ -123,14 +128,19 @@ const ProfilePage = () => {
               />
               <div className="flex flex-col">
                 {/* Username + Verified badge on one line */}
-                <div className="flex items-center gap-1">
-                  <span className="font-normal text-base outfit-font">
+                <div className="flex items-center gap-2">
+                  <span className="font-normal md:text-base text-xs outfit-font">
                     themohanreviews
                   </span>
                   <BsPatchCheckFill
                     className="text-primary size-4 block md:hidden" // Adjust size if needed
                     title="Verified"
                   />
+
+                  <div className="flex items-center space-x-1 text-base text-color-grey font-normal  md:hidden">
+                    <span className="mx-1 text-lg leading-none">•</span>
+                    <span className="text-xs">8h ago</span>
+                  </div>
                 </div>
 
                 {/* Hashtags below */}
@@ -140,7 +150,7 @@ const ProfilePage = () => {
               </div>
 
               <span className="ml-auto text-color-grey cursor-pointer">
-                <CiMenuKebab className="size-6" />
+                <PiDotsThreeOutlineVerticalFill className="size-6" />
               </span>
             </div>
             {/* Post Content */}
@@ -163,11 +173,13 @@ const ProfilePage = () => {
                 4/5
               </span>
             </div>
-            <p className="mt-2 text-color-black text-base font-normal">
-              It is a charming Italian restaurant with a warm ambiance making it
-              ideal for a cozy dinner. Don't skip the tiramisu for dessert; it's
-              a delightful finish to your meal!
+            <p className="mt-2 text-color-black md:text-base text-xs font-normal">
+              <span className="text-primary font-medium md:text-base text-xs">@petersbistro</span> is a charming
+              Italian restaurant with a warm ambiance making it ideal for a cozy
+              dinner. Don't skip the tiramisu for dessert; it's a delightful
+              finish to your meal!
             </p>
+
             <div className="mt-3 rounded-xl overflow-hidden">
               <img
                 src={post}
