@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsUrl } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsUrl, IsNumberString,Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateBusinessDto {
   @IsString()
@@ -58,4 +59,29 @@ export class CreateBusinessDto {
   @IsNumber()
   @IsOptional()
   review_count?: number;
+}
+
+export class BusinessFilterDto {
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  state?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @Transform(({ value }) => parseInt(value, 10))
+  @Min(1)
+  limit?: number = 50;
+
+  @IsOptional()
+  @IsString()
+  after?: string;
+
+  @IsOptional()
+  @IsNumberString()
+  @Transform(({ value }) => parseFloat(value))
+  minRating?: number;
 }

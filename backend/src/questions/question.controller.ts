@@ -17,10 +17,11 @@ export class QuestionsController {
 
   @Get('list')
   async getAllQuestions(@Res() response: Response) {
-    const questions = await this.questionsService.getAll();
-    return response.status(HttpStatus.OK).json({
-      length: questions.length,
-      data: questions,
-    });
+    // const questions = await this.questionsService.getAll();
+    // return response.status(HttpStatus.OK).json({
+    //   length: questions.length,
+    //   data: questions,
+    // });
+    return null;
   }
 }

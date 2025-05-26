@@ -57,3 +57,8 @@ export class Business extends Document {
 
 export type BusinessDocument = Business & Document;
 export const BusinessSchema = SchemaFactory.createForClass(Business);
+
+BusinessSchema.index(
+  { g_business_name: 'text', g_categories: 'text' },
+  { name: 'BusinessTextIndex', default_language: 'english' },
+);

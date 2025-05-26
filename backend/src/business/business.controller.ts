@@ -1,40 +1,51 @@
-import { Controller, Get, Param, Res, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
+// src/business/business.controller.ts
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  NotFoundException,
+} from '@nestjs/common';
+
 import { BusinessService } from './business.service';
+import { BusinessFilterDto } from './create-business.dto';
+import { Business } from './business.schema';
 
 @Controller('business')
 export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
-  @Get('city/:city')
-  async getBusinessesByCity(
-    @Param('city') city: string,
-    @Res() response: Response,
-  ) {
-    const businesses = await this.businessService.findByCity(city);
-    return response.status(HttpStatus.OK).json({
-      length: businesses.length,
-      data: businesses,
-    });
-  }
-
-  @Get(':id')
-  async getBusinessById(
-    @Param('id') id: string,
-    @Res() response: Response,
-  ) {
-    const business = await this.businessService.findById(id);
-    return response.status(HttpStatus.OK).json({
-      data: business,
-    });
-  }
-
+  /**  
+   * GET /business?city=Anchorage&state=AK&minRating=4.0&after=…&limit=100  
+   */
   @Get()
-  async getAllBusinesses(@Res() response: Response) {
-    const businesses = await this.businessService.findAll();
-    return response.status(HttpStatus.OK).json({
-      length: businesses.length,
-      data: businesses,
-    });
+  async findAll(
+    @Query() filter: BusinessFilterDto,
+  ): Promise<{ data: Business[]; nextAfter: any | null }> {
+    return this.businessService.findAll(filter);
   }
-} 
+
+  /**  
+   * GET /business/city/:city  
+   * Convenience wrapper for filtering by city only  
+   */
+  @Get('city/:city')
+  async findByCity(
+    @Param('city') city: string,
+    @Query('limit') limit?: number,
+  ): Promise<{ data: Business[]; nextAfter: any | null }> {
+    return this.businessService.findAll({ city, limit });
+  }
+
+  /**
+   * GET /business/:id
+   */
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<Business> {
+    const biz = await this.businessService.findById(id);
+    if (!biz) {
+      throw new NotFoundException(`Business with id ${id} not found`);
+    }
+    return biz;
+  }
+}

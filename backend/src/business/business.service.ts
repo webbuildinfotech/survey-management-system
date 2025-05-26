@@ -1,30 +1,87 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Business, BusinessDocument } from './business.schema';
+import { BusinessFilterDto } from './create-business.dto';
 
 @Injectable()
 export class BusinessService {
-  private readonly logger = new Logger(BusinessService.name);
-
   constructor(
     @InjectModel(Business.name)
-    private businessModel: Model<BusinessDocument>,
+    private readonly businessModel: Model<BusinessDocument>,
   ) {}
 
-  async findByCity(city: string): Promise<BusinessDocument[]> {
-    return this.businessModel.find({ g_city: city }).exec();
-  }
+  /**
+   * Cursor-based, filtered, projected, paginated fetch
+   */
+  async findAll(filter: BusinessFilterDto) {
+    const {
+      after,
+      limit = 50,
+      city,
+      state,
+      minRating,
+    } = filter;
 
-  async findById(id: string): Promise<BusinessDocument> {
-    const business = await this.businessModel.findById(id).exec();
-    if (!business) {
-      throw new NotFoundException(`Business with ID ${id} not found`);
+    const query: any = {};
+    if (after) {
+      // Cast after to ObjectId for comparison
+      query._id = { $gt: new Types.ObjectId(after) };
     }
-    return business;
+    if (city) {
+      query.g_city = city;
+    }
+    if (state) {
+      query.g_state = state;
+    }
+    if (minRating != null) {
+      query.g_star_rating = { $gte: minRating };
+    }
+
+    // tell TS this returns BusinessDocument[]
+  const docs = (await this.businessModel
+    .find(query)
+    .sort({ _id: 1 })
+    .limit(limit)
+    .select({
+      g_business_name: 1,
+      g_full_address: 1,
+      g_phone: 1,
+      g_star_rating: 1,
+      g_review_count: 1,
+      google_maps_url: 1,
+    })
+    .exec()) as BusinessDocument[];
+
+  const nextAfter = docs.length > 0
+    ? docs[docs.length - 1]._id
+    : null;
+
+  return { data: docs, nextAfter };
   }
 
-  async findAll(): Promise<BusinessDocument[]> {
-    return this.businessModel.find().exec();
+  /**
+   * Single document by ID
+   */
+  async findById(id: string): Promise<Business> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Invalid business ID: ${id}`);
+    }
+    const biz = await this.businessModel
+      .findById(id)
+      .select({
+        g_business_name: 1,
+        g_full_address: 1,
+        g_phone: 1,
+        g_star_rating: 1,
+        g_review_count: 1,
+        google_maps_url: 1,
+      })
+      .exec();
+    if (!biz) {
+      throw new NotFoundException(`Business with id ${id} not found`);
+    }
+    return biz;
   }
-} 
+}
