@@ -117,6 +117,8 @@ export class QuestionsService {
     }
     await this.voteModel.insertMany(votes);
 
+    console.log({votes})
+
     // 10) aggregate vote counts + lookup top voters
     const results = await this.voteModel.aggregate([
       { $match: { surveyId: surveyDoc._id } },
@@ -124,7 +126,7 @@ export class QuestionsService {
       { $sort: { votes: -1 } },
       {
         $lookup: {
-          from: 'business',
+          from: 'businesses',
           localField: '_id',
           foreignField: '_id',
           as: 'biz'
@@ -133,7 +135,7 @@ export class QuestionsService {
       { $unwind: '$biz' },
       {
         $lookup: {
-          from: 'vote',
+          from: 'votes',
           let: { bizId: '$_id' },
           pipeline: [
             {
@@ -150,7 +152,7 @@ export class QuestionsService {
             { $limit: 3 },
             {
               $lookup: {
-                from: 'user',
+                from: 'users',
                 localField: 'userId',
                 foreignField: '_id',
                 as: 'user'
@@ -179,12 +181,37 @@ export class QuestionsService {
       }
     ]);
 
+    // Add logging to debug
+    console.log('Survey ID:', surveyDoc._id);
+    console.log('Number of votes created:', votes.length);
+    console.log('Aggregation results:', JSON.stringify(results, null, 2));
+
+    // Ensure we have results before returning
+    if (!results || results.length === 0) {
+      // If no results, create a basic response with business info
+      const basicResults = businesses.map(biz => ({
+        businessName: biz.g_business_name,
+        full_address: biz.g_full_address,
+        google_maps_url: biz.google_maps_url,
+        votes: 0,
+        voters: []
+      }));
+
+      return {
+        message: 'Survey created successfully',
+        question: questionDoc.question,
+        city,
+        aiResponse: aiAnswer,
+        surveyResults: basicResults
+      };
+    }
+
     return {
       message: 'Survey created successfully',
       question: questionDoc.question,
       city,
       aiResponse: aiAnswer,
-      surveyResults: results as BusinessVoteDto[]
+      surveyResults: results
     };
   }
 
