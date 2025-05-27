@@ -2,22 +2,20 @@ import React, { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import LeftSidebar from "../components/Sidebar/LeftSidebar";
 import RightSidebar from "../components/Sidebar/RightSidebar";
-import { MdNavigateBefore } from "react-icons/md";
 
 import { GoHome } from "react-icons/go";
-import { MdSearch } from "react-icons/md";
 import { LuSquarePlus } from "react-icons/lu";
 import { RiChatPollLine } from "react-icons/ri";
 import { HiOutlineUser } from "react-icons/hi";
-import { FiMenu } from "react-icons/fi";
-import { LuBell } from "react-icons/lu";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
+
 import { BsSearch } from "react-icons/bs";
+import Header from "../components/Header";
 const MainLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
     <div className="flex flex-col min-h-screen">
+     
       {/* Main content area with sidebars */}
       <main className="flex flex-1">
         {/* Left Sidebar - Fixed on medium and up */}
@@ -35,54 +33,7 @@ const MainLayout = () => {
             isSidebarCollapsed ? "md:ml-16" : "md:ml-16 xl:ml-100"
           } xl:mr-100 max-xl:px-8 max-md:px-0`}
         >
-          {/* Mobile Header */}
-
-          {/* For Static position header */}
-          {/* <div className="md:hidden flex justify-between items-center p-4 bg-white"> */}
-
-          {/* For fixed position header OWn Profile*/}
-          <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-4 bg-white shadow-md">
-            <div className="flex items-center">
-              <FiMenu className="cursor-pointer size-8" />
-              <div className="ml-4 text-3xl font-bold text-primary">
-                Griterr
-              </div>
-            </div>
-            <span className="cursor-pointer size-6">
-              <LuBell className="size-6" />
-            </span>
-          </div>
-
-          {/* For fixed position header Public Profile*/}
-          <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-4 bg-white">
-            <div className="flex items-center">
-              <MdNavigateBefore
-                className="cursor-pointer size-8"
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              />
-              <span className="ml-2 font-medium text-base">
-                @themohanreviews
-              </span>
-            </div>
-            <span className="cursor-pointer text-color-grey">
-              <PiDotsThreeOutlineVerticalFill className="size-6" />
-            </span>
-          </div>
-
-          {/* Desktop Header */}
-          <div className="hidden md:flex w-full justify-start pb-2 bg-white">
-            <div className="flex items-center">
-              <MdNavigateBefore
-                className="cursor-pointer size-8"
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              />
-              <span className="ml-2 font-medium text-base">
-                @themohanreviews
-              </span>
-            </div>
-          </div>
-
-          {/* Routed Page Content */}
+           <Header />
           <Outlet />
         </div>
 
@@ -108,7 +59,6 @@ const MainLayout = () => {
       {/* <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl px-0 py-1 z-50 shadow-[0_-4px_30px_rgba(255,255,255,0.6),0_-2px_10px_rgba(0,0,0,0.1)] backdrop-black-md">
        */}
       <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl  md:hidden z-50 px-0 py-1 shadow-[0_-4px_15px_rgba(0,0,0,0.30)]">
-
         <nav className="flex justify-between">
           <NavLink
             to="/"

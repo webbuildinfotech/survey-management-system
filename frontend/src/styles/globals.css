@@ -9,6 +9,7 @@
 }
 .text-color-grey{
   color:#888888
+  
 }
 
 .text-color-black{
@@ -41,4 +42,15 @@
 
 .custom-shadow {
   box-shadow: 5px 10px #aa2f2f;
+}
+
+
+/* Border */
+
+.border-blue{
+  border-color: #1d9bf0;
+}
+
+.border-grey{
+  border-color: #888888;
 }

@@ -1,8 +1,7 @@
 // src/routes/RoutePaths.js
 
 export const RoutePaths = {
-
-// Auth Routes
+  // Auth Routes
   LOGIN: "/login",
   SIGNUP: "/signup",
   RESET: "/reset",
@@ -12,6 +11,8 @@ export const RoutePaths = {
   // Protected Routes
 
   HOME: "/",
+  SEARCH: "/search",
+  ANSWER: "/answers",
+  CREATE: "/create",
   PROFILE: "/profile",
-
 };

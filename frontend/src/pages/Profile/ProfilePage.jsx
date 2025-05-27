@@ -1,18 +1,18 @@
 import React, { useState } from "react";
-import { FaStar } from "react-icons/fa";
-
 import profile from "../../assets/profile.png";
 import food from "../../assets/bg.png";
 import post from "../../assets/post.png";
 import { BsPatchCheckFill } from "react-icons/bs";
-import { PiDotsThreeOutlineVerticalFill } from "react-icons/pi";
-
-import { HiOutlineLocationMarker } from "react-icons/hi";
 import { Tabs } from "../../components/Tabs/Tab";
 import TabsComponent from "../../components/Tabs/ActiveTabs";
-import { ImMenu } from "react-icons/im";
+import Activity from "../../components/Tabs/Activity";
+import Polls from "../../components/Tabs/Polls";
+import { PollData } from "../../data/PollData";
+import Collection from "../../components/Tabs/Collection";
+import Tag from "../../components/Tabs/Tag";
+
 const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState("Activity");
+  const [activeTab, setActiveTab] = useState("Tag");
 
   return (
     <main className="bg-white min-h-screen font-sans antialiased">
@@ -39,16 +39,22 @@ const ProfilePage = () => {
           {/* Stats - Moved to bottom on mobile */}
           <div className="order-4 md:order-2 hidden md:flex gap-8 p-4 pr-0 justify-center md:justify-start">
             <div className="text-center">
-              <p className="text-2xl font-medium">2.5k</p>
-              <p className="text-color-grey text-base font-normal">Followers</p>
+              <p className="md:text-2xl text-base font-medium">2.5k</p>
+              <p className="text-color-grey md:text-base text-xs font-normal">
+                Followers
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-medium">1.2k</p>
-              <p className="text-color-grey text-base font-normal">Following</p>
+              <p className="md:text-2xl text-base font-medium">1.2k</p>
+              <p className="text-color-grey md:text-base text-xs font-normal">
+                Following
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-medium">152</p>
-              <p className="text-color-grey text-base font-normal">Posts</p>
+              <p className="md:text-2xl text-base font-medium">152</p>
+              <p className="text-color-grey md:text-base text-xs font-normal">
+                Posts
+              </p>
             </div>
           </div>
         </div>
@@ -60,7 +66,9 @@ const ProfilePage = () => {
           {/* Name and Bio */}
           <div className="order-2 md:order-1 px-6 text-center md:text-left mt-5">
             <div className="flex items-center gap-2 justify-center md:justify-start">
-              <h1 className="text-2xl font-medium">Mohan Sharma</h1>
+              <h1 className="md:text-2xl text-base font-medium">
+                Mohan Sharma
+              </h1>
               <BsPatchCheckFill
                 className="text-primary size-8"
                 title="Verified"
@@ -77,7 +85,7 @@ const ProfilePage = () => {
               className="bg-black max-md:bg-white max-md:text-[#1d9bf0] text-white 
             px-6 py-2 rounded-2xl font-medium  max-md:border max-md:border-text-primary text-xs outfit-font"
             >
-              Edit Profile
+              Following
             </button>
           </div>
 
@@ -86,24 +94,26 @@ const ProfilePage = () => {
             {/* Stats */}
             <div className="flex gap-8">
               <div className="text-center">
-                <p className="text-2xl font-medium">2.5k</p>
-                <p className="text-color-grey text-base font-normal">
+                <p className="md:text-2xl text-base font-medium">2.5k</p>
+                <p className="text-color-grey md:text-base text-xs font-normal">
                   Followers
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-medium">1.2k</p>
-                <p className="text-color-grey text-base font-normal">
+                <p className="md:text-2xl text-base font-medium">1.2k</p>
+                <p className="text-color-grey md:text-base text-xs font-normal">
                   Following
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-medium">152</p>
-                <p className="text-color-grey text-base font-normal">Posts</p>
+                <p className="md:text-2xl text-base font-medium">152</p>
+                <p className="text-color-grey md:text-base text-xs font-normal">
+                  Posts
+                </p>
               </div>
             </div>
             {/* Mission text - shown only on mobile */}
-            <p className="text-gray-600 text-center text-base font-normal">
+            <p className="text-gray-600 text-center md:text-base text-xs font-normal">
               On a mission to find best street food in Mumbai!
             </p>
           </div>
@@ -119,74 +129,74 @@ const ProfilePage = () => {
         {/* Activity Section (Sample Post) */}
         {activeTab === "Activity" && (
           <div className="mt-8">
-            {/* Post Header */}
-            <div className="flex items-center gap-3">
-              <img
-                src={profile}
-                alt="profile"
-                className="w-10 h-10 rounded-full"
-              />
-              <div className="flex flex-col">
-                {/* Username + Verified badge on one line */}
-                <div className="flex items-center gap-2">
-                  <span className="font-normal md:text-base text-xs outfit-font">
-                    themohanreviews
-                  </span>
-                  <BsPatchCheckFill
-                    className="text-primary size-4 block md:hidden" // Adjust size if needed
-                    title="Verified"
-                  />
+            <Activity
+              profile={profile}
+              post={post}
+              username="themohanreviews"
+              location="PetersBistro, New York City"
+              stars={4}
+              timeAgo="8h ago"
+              hashtags="#review #restaurant #italianfood"
+              description="is a charming Italian restaurant with a warm ambiance making it ideal for a cozy dinner. Don't skip the tiramisu for dessert; it's a delightful finish to your meal!"
+              tagName="petersbistro"
+            />
+          </div>
+        )}
 
-                  <div className="flex items-center space-x-1 text-base text-color-grey font-normal  md:hidden">
-                    <span className="mx-1 text-lg leading-none">•</span>
-                    <span className="text-xs">8h ago</span>
-                  </div>
-                </div>
+        {activeTab === "Polls" && (
+          <div className="mt-8">
+            <Polls
+              profile={profile}
+              username="themohanreviews"
+              timeAgo="8h ago"
+              hashtags="#review #restaurant #italianfood"
+              tagName="petersbistro"
+              content="If ya’ll were in the market to buy an EV for commute, which company would you go for?"
+              pollData={PollData}
+            />
+          </div>
+        )}
 
-                {/* Hashtags below */}
-                <span className="font-normal text-sm text-color-grey">
-                  #review #restaurant #italianfood
-                </span>
-              </div>
+        {activeTab === "Tagged" && (
+          <div className="mt-8">
+            <Tag
+              profile={profile}
+              post={post}
+              username="nandinisharma23"
+              location="PetersBistro, New York City"
+              stars={5}
+              timeAgo="8h ago"
+              hashtags="#review  #restaurant  #italianfood"
+              description="@themohanreviews thanks to your review I decided to try @petersbistro in NYC and man it was the best meal I have had in a long time! Really loved the pizza there and the thickshakes! Definitely gonna spread the word ❤️ "
+            />
+          </div>
+        )}
 
-              <span className="ml-auto text-color-grey cursor-pointer">
-                <PiDotsThreeOutlineVerticalFill className="size-6" />
-              </span>
-            </div>
-            {/* Post Content */}
-            <div className="flex items-center gap-2 mt-2 text-sm text-gray-700">
-              <HiOutlineLocationMarker className="size-6" />
-              <span className="font-medium text-base">
-                PetersBistro, New York City
-              </span>
-            </div>
-            <div className="flex items-center gap-1 mt-2">
-              {[...Array(4)].map((_, i) => (
-                <FaStar key={i} className="text-yellow-400" />
-              ))}
-              <FaStar className="text-color-grey" />
+        {activeTab === "Collection" && (
+          <div className="mt-8">
+            <Collection
+              mainImage="/images/collection/restaurent.png"
+              sideImage1="/images/collection/view1.png"
+              sideImage2="/images/collection/view2.png"
+              title="Best Chinese Restaurants in Mumbai  🔥"
+              posts={24}
+              views="25k"
+            />
+          </div>
+        )}
 
-              <span className="ml-2 text-base font-medium text-color-grey hidden sm:inline">
-                4.5
-              </span>
-              <span className="ml-2 text-base font-medium text-color-grey sm:hidden">
-                4/5
-              </span>
-            </div>
-            <p className="mt-2 text-color-black md:text-base text-xs font-normal">
-              <span className="text-primary font-medium md:text-base text-xs">@petersbistro</span> is a charming
-              Italian restaurant with a warm ambiance making it ideal for a cozy
-              dinner. Don't skip the tiramisu for dessert; it's a delightful
-              finish to your meal!
-            </p>
-
-            <div className="mt-3 rounded-xl overflow-hidden">
-              <img
-                src={post}
-                alt="restaurant"
-                className="w-full h-auto object-cover"
-              />
-            </div>
+        {activeTab === "Tag" && (
+          <div className="mt-8">
+            <Tag
+              profile={profile}
+              post={post}
+              username="nandinisharma23"
+              location="PetersBistro, New York City"
+              stars={3}
+              timeAgo="8h ago"
+              hashtags="#review  #restaurant  #italianfood"
+              description="@themohanreviews thanks to your review I decided to try @petersbistro in NYC and man it was the best meal I have had in a long time! Really loved the pizza there and the thickshakes! Definitely gonna spread the word ❤️ "
+            />
           </div>
         )}
       </div>

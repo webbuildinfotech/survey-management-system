@@ -8,7 +8,7 @@ const TabsComponent = ({ tabs, activeTab, setActiveTab }) => {
 
 
   return (
-    <div className="flex items-center gap-14 mt-8 max-md:mt-2">
+    <div className="flex items-center justify-between md:justify-start md:gap-14 mt-8 max-md:mt-2">
         {tabs.filter(tab => (!isMobile && tab.name !== "Tag") || (isMobile && tab.name !== "Tagged")).map((tab, index) => (
 
         <button
