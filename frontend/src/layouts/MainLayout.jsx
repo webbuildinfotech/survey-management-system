@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import LeftSidebar from "../components/Sidebar/LeftSidebar";
 import RightSidebar from "../components/Sidebar/RightSidebar";
 
@@ -10,12 +10,20 @@ import { HiOutlineUser } from "react-icons/hi";
 
 import { BsSearch } from "react-icons/bs";
 import Header from "../components/Header";
+import UserHeader from "../components/UserHeader";
+import { RoutePaths } from "../routes/Path";
+
 const MainLayout = () => {
+  
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const location = useLocation();
+
+  const locate = location.pathname === RoutePaths.PROFILE;
 
   return (
     <div className="flex flex-col min-h-screen">
-     
+      <Header />
       {/* Main content area with sidebars */}
       <main className="flex flex-1">
         {/* Left Sidebar - Fixed on medium and up */}
@@ -29,11 +37,16 @@ const MainLayout = () => {
 
         {/* Main Content Area */}
         <div
-          className={`flex-1 pb-16 md:pb-0 transition-all duration-300 ${
+          className={`flex-1 mt-9 pb-16 md:pb-0 transition-all duration-300 ${
             isSidebarCollapsed ? "md:ml-16" : "md:ml-16 xl:ml-100"
           } xl:mr-100 max-xl:px-8 max-md:px-0`}
         >
-           <Header />
+          {locate && (
+            <UserHeader
+              isSidebarCollapsed={isSidebarCollapsed}
+              setIsSidebarCollapsed={setIsSidebarCollapsed}
+            />
+          )}
           <Outlet />
         </div>
 

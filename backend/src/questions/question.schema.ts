@@ -17,6 +17,9 @@ export class Question extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'Survey' })
   survey?: Types.ObjectId;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Vote' }] })
+  votes?: Types.ObjectId[];
 }
 
 export type QuestionDocument = Question & Document;

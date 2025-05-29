@@ -12,6 +12,7 @@ import { QuestionsModule } from 'questions/question.module';
 import { databaseConfig } from 'config/database.config';
 import { Connection } from 'mongoose';
 import { InjectConnection } from '@nestjs/mongoose';
+import { BusinessProfileModule } from 'business-profile/business.profile.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { InjectConnection } from '@nestjs/mongoose';
     UserModule,
     BusinessModule,
     QuestionsModule,
+    BusinessProfileModule
   ],
   controllers: [AppController],
   providers: [AppService],

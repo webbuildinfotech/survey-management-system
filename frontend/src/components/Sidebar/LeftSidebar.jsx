@@ -43,9 +43,16 @@ const LeftSidebar = ({ isCollapsed }) => {
   const currentPath = window.location.pathname;
 
   return (
+    // For Figma
+    // <div
+    //   className={`w-16 ${!isCollapsed ? "xl:w-100" : ""} flex flex-col ${
+    //     !isCollapsed ? "xl:pl-32 py-12" : ""
+    //   } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen justify-between`}
+    // >
+
     <div
       className={`w-16 ${!isCollapsed ? "xl:w-100" : ""} flex flex-col ${
-        !isCollapsed ? "xl:pl-32 py-12" : ""
+        !isCollapsed ? "xl:pl-3 p-4" : ""
       } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen justify-between`}
     >
       <div>
