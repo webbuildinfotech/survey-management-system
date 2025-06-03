@@ -1,163 +1,83 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { BusinessProfile, BusinessProfileDocument } from './business.profile.schema';
-import { CreateBusinessProfileDto } from './business.profile.dto';
+import {
+  BusinessProfile,
+  BusinessProfileDocument,
+} from './business.profile.schema';
 import axios from 'axios';
 
-const GOOGLE_PLACES_API_KEY ="AIzaSyANzBwVlOrehZLAsP_ugpJMBuO5E42mXjg"
+const GOOGLE_PLACES_API_KEY = 'AIzaSyBdwSXsHESmuxHEKMdSu2DXfgMPrqYvJSE';
 // const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY as string;
 console.log('API Key:', GOOGLE_PLACES_API_KEY ? 'Present' : 'Missing');
 
 @Injectable()
 export class BusinessProfileService {
-
   constructor(
     @InjectModel(BusinessProfile.name)
     private businessProfileModel: Model<BusinessProfileDocument>,
   ) {}
 
-  async searchAndCreateByQuery(query: string, location: string = 'United States'): Promise<BusinessProfile[]> {
+  async createFromGooglePlaces(
+    placeId: string,
+    apiKey: string,
+  ): Promise<BusinessProfile> {
     try {
-      // First search for places using the query
-      const searchResponse = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&key=${GOOGLE_PLACES_API_KEY}`
-      );
-
-      const places = searchResponse.data.results;
-      const results: BusinessProfile[] = [];
-
-      // Create profiles for each place found
-      for (const place of places) {
-        try {
-          const profile = await this.createFromGooglePlaces(place.place_id, GOOGLE_PLACES_API_KEY);
-          results.push(profile);
-        } catch (error) {
-          console.warn(`Failed to create profile for place ${place.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-      }
-
-      return results;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to search and create profiles: ${error.message}`);
-      }
-      throw new Error('Failed to search and create profiles: Unknown error');
-    }
-  }
-
-  async searchAndCreateByCategory(category: string, location: string = 'United States'): Promise<BusinessProfile[]> {
-    try {
-      console.log('Searching for category:', category, 'in location:', location);
-      
-      // First, get the coordinates for the location
-      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${GOOGLE_PLACES_API_KEY}`;
-      console.log('Geocode URL:', geocodeUrl);
-      
-      const geocodeResponse = await axios.get(geocodeUrl);
-      console.log('Geocode Response:', JSON.stringify(geocodeResponse.data, null, 2));
-
-      if (!geocodeResponse.data.results || geocodeResponse.data.results.length === 0) {
-        throw new Error('Could not find location coordinates');
-      }
-
-      const locationCoords = geocodeResponse.data.results[0].geometry.location;
-      const { lat, lng } = locationCoords;
-
-      // Search for places in the category using nearby search
-      const searchUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=5000&type=${encodeURIComponent(category)}&key=${GOOGLE_PLACES_API_KEY}`;
-      console.log('Search URL:', searchUrl);
-
-      const searchResponse = await axios.get(searchUrl);
-      console.log('Search Response Status:', searchResponse.status);
-      console.log('Search Response Data:', JSON.stringify(searchResponse.data, null, 2));
-
-      if (!searchResponse.data.results || searchResponse.data.results.length === 0) {
-        console.log('No results found for the search');
-        return [];
-      }
-
-      const places = searchResponse.data.results;
-      console.log('Found places:', places.length);
-      
-      const results: BusinessProfile[] = [];
-
-      // Create profiles for each place found
-      for (const place of places) {
-        try {
-          console.log('Processing place:', place.name);
-          const profile = await this.createFromGooglePlaces(place.place_id, GOOGLE_PLACES_API_KEY);
-          results.push(profile);
-          console.log('Successfully created profile for:', place.name);
-        } catch (error) {
-          console.error(`Failed to create profile for place ${place.name}:`, error);
-        }
-      }
-
-      return results;
-    } catch (error: unknown) {
-      console.error('Error in searchAndCreateByCategory:', error);
-      if (error instanceof Error) {
-        throw new Error(`Failed to search and create profiles by category: ${error.message}`);
-      }
-      throw new Error('Failed to search and create profiles by category: Unknown error');
-    }
-  }
-
-  async createFromGooglePlaces(placeId: string, apiKey: string): Promise<BusinessProfile> {
-    try {
-      console.log('Creating profile for place ID:', placeId);
-      
+      const apiKey = GOOGLE_PLACES_API_KEY;
       // Check if profile already exists
-      const existingProfile = await this.businessProfileModel.findOne({ place_id: placeId }).exec();
+      const existingProfile = await this.businessProfileModel
+        .findOne({ place_id: placeId })
+        .exec();
       if (existingProfile) {
-        console.log('Profile already exists for place ID:', placeId);
         return existingProfile;
       }
 
       // Fetch from Google Places API
       const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,geometry,rating,user_ratings_total,opening_hours,website,photos,types,formatted_phone_number&key=${apiKey}`;
-      console.log('Details URL:', detailsUrl);
 
       const response = await axios.get(detailsUrl);
-      console.log('Details Response Status:', response.status);
-
       if (!response.data.result) {
         throw new Error('No result data in response');
       }
 
       const place = response.data.result;
-      console.log('Place data:', JSON.stringify(place, null, 2));
-      
-      // Extract city from formatted address
-      const addressParts = place.formatted_address.split(',');
-      const city = addressParts[1]?.trim() || '';
 
-      // Create business profile directly from Google Places data
+      // Parse address components
+      const addressParts = place.formatted_address.split(',');
+      const streetAddress = addressParts[0]?.trim() || '';
+      const city = addressParts[1]?.trim() || '';
+      const stateZip = addressParts[2]?.trim() || '';
+      const country = addressParts[3]?.trim() || '';
+
+      // Extract state and zipcode
+      const stateZipParts = stateZip.split(' ');
+      const state = stateZipParts[0] || '';
+      const zipcode = stateZipParts[1] || '';
+
+      // Create business profile
       const businessProfile = new this.businessProfileModel({
-        name: place.name,
-        city,
-        full_address: place.formatted_address,
-        category: place.types?.[0] || '',
-        rating: place.rating,
-        review_count: place.user_ratings_total,
-        hours: place.opening_hours?.weekday_text?.join('\n'),
-        website: place.website,
-        photos: place.photos?.map((photo: { photo_reference: string }) => 
-          `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${apiKey}`
-        ),
-        place_id: placeId,
+        g_business_name: place.name,
+        g_categories: place.types?.[0] || '',
+        g_phone: place.formatted_phone_number,
+        g_full_address: place.formatted_address,
+        g_street_address: streetAddress,
+        g_city: city,
+        g_state: state,
+        g_zipcode: zipcode,
+        g_country: country,
+        g_latitude: place.geometry?.location?.lat?.toString(),
+        g_longitude: place.geometry?.location?.lng?.toString(),
+        g_star_rating: place.rating?.toString(),
+        g_review_count: place.user_ratings_total?.toString(),
+        g_hours_of_operation: place.opening_hours?.weekday_text?.join('\n'),
+        g_website: place.website,
+        g_closed_status: place.opening_hours?.open_now ? 'OPEN' : 'CLOSED',
         google_maps_url: `https://www.google.com/maps/place/?q=place_id:${placeId}`,
-        phone: place.formatted_phone_number,
-        latitude: place.geometry?.location?.lat,
-        longitude: place.geometry?.location?.lng,
       });
 
       const savedProfile = await businessProfile.save();
-      console.log('Successfully saved profile:', (savedProfile as any).name);
       return savedProfile;
     } catch (error: unknown) {
-      console.error('Error in createFromGooglePlaces:', error);
       if (error instanceof Error) {
         throw new Error(`Failed to create business profile: ${error.message}`);
       }
@@ -165,7 +85,10 @@ export class BusinessProfileService {
     }
   }
 
-  async createMultipleFromGooglePlaces(placeIds: string[], apiKey: string): Promise<BusinessProfile[]> {
+  async createMultipleFromGooglePlaces(
+    placeIds: string[],
+    apiKey: string,
+  ): Promise<BusinessProfile[]> {
     const results: BusinessProfile[] = [];
     const errors: string[] = [];
 
@@ -174,7 +97,9 @@ export class BusinessProfileService {
         const profile = await this.createFromGooglePlaces(placeId, apiKey);
         results.push(profile);
       } catch (error) {
-        errors.push(`Failed to process place ID ${placeId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        errors.push(
+          `Failed to process place ID ${placeId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
       }
     }
 
@@ -189,25 +114,74 @@ export class BusinessProfileService {
     return this.businessProfileModel.find().exec();
   }
 
-  async findOne(id: string): Promise<BusinessProfile> {
-    const profile = await this.businessProfileModel.findById(id).exec();
-    if (!profile) {
-      throw new NotFoundException(`Business profile with ID ${id} not found`);
-    }
-    return profile;
-  }
+  async searchPlaces(query: string, location?: string): Promise<any[]> {
+    try {
+      const apiKey = GOOGLE_PLACES_API_KEY;
+      if (!apiKey) {
+        throw new Error('Google Places API key is not configured');
+      }
 
-  async findByPlaceId(placeId: string): Promise<BusinessProfile> {
-    const profile = await this.businessProfileModel.findOne({ place_id: placeId }).exec();
-    if (!profile) {
-      throw new NotFoundException(`Business profile with place ID ${placeId} not found`);
-    }
-    return profile;
-  }
+      console.log('Searching for:', {
+        query,
+        location,
+        apiKey: apiKey ? 'Present' : 'Missing',
+      });
 
-  async searchByCategory(category: string): Promise<BusinessProfile[]> {
-    return this.businessProfileModel
-      .find({ category: { $regex: category, $options: 'i' } })
-      .exec();
+      // Construct the search URL
+      let searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${apiKey}`;
+
+      // Add location if provided
+      if (location) {
+        searchUrl += `&location=${encodeURIComponent(location)}`;
+      }
+
+      console.log('Search URL:', searchUrl);
+
+      const response = await axios.get(searchUrl);
+      console.log('API Response:', JSON.stringify(response.data, null, 2));
+
+      if (!response.data.results) {
+        console.log('No results found in response');
+        return [];
+      }
+
+      if (
+        response.data.status !== 'OK' &&
+        response.data.status !== 'ZERO_RESULTS'
+      ) {
+        throw new Error(`Google Places API error: ${response.data.status}`);
+      }
+
+      // Map the results to a simpler format
+      const results = response.data.results.map(
+        (place: {
+          place_id: any;
+          name: any;
+          formatted_address: any;
+          rating: any;
+          types: any;
+          photos: any[];
+        }) => ({
+          place_id: place.place_id,
+          name: place.name,
+          formatted_address: place.formatted_address,
+          rating: place.rating,
+          types: place.types,
+          photos: place.photos?.map(
+            (photo: { photo_reference: any }) =>
+              `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${apiKey}`,
+          ),
+        }),
+      );
+
+      console.log('Processed results:', results.length);
+      return results;
+    } catch (error) {
+      console.error('Error in searchPlaces:', error);
+      if (error instanceof Error) {
+        throw new Error(`Failed to search places: ${error.message}`);
+      }
+      throw new Error('Failed to search places: Unknown error');
+    }
   }
 }

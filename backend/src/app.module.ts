@@ -16,7 +16,10 @@ import { BusinessProfileModule } from 'business-profile/business.profile.module'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     MongooseModule.forRootAsync({
       useFactory: () => databaseConfig
     }),
