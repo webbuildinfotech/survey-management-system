@@ -128,11 +128,11 @@ export class AiService {
 
   private async analyzeQuestion(text: string): Promise<QuestionAnalysis> {
     const analysisPrompt = `Analyze this question and return JSON with these fields:
-    - intent: What the user wants to find (e.g., "restaurant", "hotel", "shop" etc.)
-    - location: The city or area they're interested in
-    - category: The specific type of business they want
-    - criteria: List of important factors they care about (e.g., "best", "cheap", "luxury")
-    
+    - intent: What the user wants to find (e.g., "restaurant", "hotel", "shop", "tourist spot", "attraction")
+    - location: search city or area
+    - category: The specific type they want (e.g., "italian restaurant", "luxury hotel", "tourist attraction")
+    - criteria: List of important factors they care about (e.g., "best", "cheap", "luxury", "beautiful", "popular")
+    - context: Additional context or preferences mentioned
     Question: "${text}"`;
 
     const response = await this.googleAI.models.generateContent({
@@ -141,6 +141,8 @@ export class AiService {
     });
 
     const rawContent = response.text ?? '{}';
+
+    console.log({ rawContent });
     const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('No JSON object found in AI analysis response');
@@ -182,11 +184,15 @@ export class AiService {
       const searchTerms = analysis.category.toLowerCase().split(/\s+/);
       query.$or = [
         // Exact name match
-        { g_business_name: { $regex: new RegExp(`^${analysis.category}$`, 'i') } },
+        {
+          g_business_name: {
+            $regex: new RegExp(`^${analysis.category}$`, 'i'),
+          },
+        },
         // Category match
         { g_categories: { $regex: new RegExp(searchTerms.join('|'), 'i') } },
         // Partial name match
-        { g_business_name: { $regex: new RegExp(searchTerms.join('|'), 'i') } }
+        { g_business_name: { $regex: new RegExp(searchTerms.join('|'), 'i') } },
       ];
 
       const cityBusinesses = await this.businessModel
@@ -210,8 +216,12 @@ export class AiService {
         // Category match gets second priority
         const aCategories = (a.g_categories || '').toLowerCase().split(',');
         const bCategories = (b.g_categories || '').toLowerCase().split(',');
-        const aCategoryMatch = aCategories.some(cat => cat.includes(searchTerm));
-        const bCategoryMatch = bCategories.some(cat => cat.includes(searchTerm));
+        const aCategoryMatch = aCategories.some((cat) =>
+          cat.includes(searchTerm),
+        );
+        const bCategoryMatch = bCategories.some((cat) =>
+          cat.includes(searchTerm),
+        );
         if (aCategoryMatch && !bCategoryMatch) return -1;
         if (!aCategoryMatch && bCategoryMatch) return 1;
 
@@ -260,17 +270,54 @@ export class AiService {
         };
       });
 
+      console.log({ businessData });
+
       // 5. Create enhanced prompt with analysis context
-      const prompt = `You are a business recommendation system.provided 5 to 10 business data Return a JSON object with the following structure:
-{ "results": [ { "name": "Business Name", "rating": 4.5, "category": "Category Name" } ] }
-Context:
-- User wants: ${analysis.intent}
-- Location: ${matchedCity}
-- Category: ${analysis.category}
-- Important criteria: ${analysis.criteria.join(', ')}
-Business data: ${JSON.stringify(businessData)}
-Return ONLY the JSON object, no additional text or formatting.
-`;
+      const prompt = `You are a precise business recommendation system. Return businesses that match the user's search criteria:
+
+1. Category Matching:
+   - User is looking for: ${analysis.category}
+   - Match businesses if ANY of these conditions are met:
+     * Business name contains the category keywords
+     * Business categories contain the category keywords
+     * Business categories are related to the requested category
+   - For "sport store" example:
+     * Match: "Sports memorabilia store", "Sportswear store", "Sports equipment"
+     * Match: Business names containing "sport", "sports", "athletic"
+   - For any category:
+     * Look for exact matches
+     * Look for partial matches
+     * Look for related categories
+
+2. Location Matching:
+   - Must be in: ${matchedCity}
+   - No exceptions for location
+
+3. Business Data Analysis:
+   - Check both business name and categories
+   - Consider partial matches in categories
+   - Consider related categories
+   - Then consider rating and popularity
+
+Return a JSON object with this structure:
+{ 
+  "results": [
+    {
+      "name": "Business Name",
+      "rating": 4.5,
+      "category": "Category Name",
+      "matchReason": "Category match: [category]"
+    }
+  ]
+}
+
+Business data to analyze: ${JSON.stringify(businessData)}
+
+IMPORTANT: 
+- Look for both exact and partial category matches
+- Consider business names containing category keywords
+- Consider related categories
+- Return ONLY the JSON object, no additional text.`;
 
       // 6. Get AI response
       const response = await this.googleAI.models.generateContent({
