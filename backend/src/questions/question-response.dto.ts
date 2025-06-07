@@ -16,7 +16,18 @@ export class QuestionResponseDto {
   city?: string;
   aiResponse?: string;
   aiSummarizedQuestion?: string;
-  businessList?: any[];
+  businessList?: {
+    name: string;
+    rating?: number;
+    categories?: string[];
+    score?: number;
+    scoreBreakdown?: {
+      qualityScore: number;
+      expertiseScore: number;
+      valueScore: number;
+    };
+    reasoning?: string;
+  }[];
   matchedBusinesses?: any[];
   surveyResults?: {
     businessName: string;

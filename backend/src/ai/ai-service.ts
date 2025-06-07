@@ -3,6 +3,10 @@ import { InjectModel, raw } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { GoogleGenAI } from '@google/genai';
 import { Business, BusinessDocument } from 'business/business.schema';
+// import {
+//   BusinessProfile,
+//   BusinessProfileDocument,
+// } from 'business-profile/business.profile.schema';
 
 interface QuestionAnalysis {
   intent: string;
@@ -142,7 +146,7 @@ export class AiService {
 
     const rawContent = response.text ?? '{}';
 
-    console.log({ rawContent });
+    // console.log({ rawContent });
     const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('No JSON object found in AI analysis response');
@@ -164,7 +168,7 @@ export class AiService {
     try {
       // 1. First analyze the question to understand user intent
       const analysis = await this.analyzeQuestion(text);
-      console.log('Question Analysis:', analysis);
+      // console.log('Question Analysis:', analysis);
 
       // 2. Get cities from cache and find match
       const allCities = await this.getCities();
@@ -180,24 +184,35 @@ export class AiService {
       // 3. Get businesses for matched city with category filter if available
       const query: any = { g_city: matchedCity };
 
-      // Create a more flexible search condition
-      const searchTerms = analysis.category.toLowerCase().split(/\s+/);
+      // Create a more strict search condition based on exact category match
+      const searchCategory = analysis.category.toLowerCase().trim();
       query.$or = [
+        // Exact category match
+        { 
+          g_categories: { 
+            $regex: new RegExp(`\\b${searchCategory}\\b`, 'i') 
+          }
+        },
         // Exact name match
         {
           g_business_name: {
-            $regex: new RegExp(`^${analysis.category}$`, 'i'),
+            $regex: new RegExp(`^${searchCategory}$`, 'i'),
           },
-        },
-        // Category match
-        { g_categories: { $regex: new RegExp(searchTerms.join('|'), 'i') } },
-        // Partial name match
-        { g_business_name: { $regex: new RegExp(searchTerms.join('|'), 'i') } },
+        }
       ];
 
       const cityBusinesses = await this.businessModel
         .find(query)
-        .select('g_business_name g_star_rating g_categories')
+        .select(`
+          g_business_name 
+          g_star_rating 
+          g_categories 
+          g_full_address 
+          g_latitude 
+          g_longitude 
+          g_review_count 
+          google_maps_url
+        `)
         .limit(500)
         .lean();
 
@@ -205,43 +220,28 @@ export class AiService {
       const sortedBusinesses = cityBusinesses.sort((a, b) => {
         const aName = (a.g_business_name || '').toLowerCase();
         const bName = (b.g_business_name || '').toLowerCase();
-        const searchTerm = analysis.category.toLowerCase();
+        const searchTerm = searchCategory;
 
-        // Exact name match gets highest priority
-        const aExactMatch = aName === searchTerm;
-        const bExactMatch = bName === searchTerm;
-        if (aExactMatch && !bExactMatch) return -1;
-        if (!aExactMatch && bExactMatch) return 1;
-
-        // Category match gets second priority
+        // Exact category match gets highest priority
         const aCategories = (a.g_categories || '').toLowerCase().split(',');
         const bCategories = (b.g_categories || '').toLowerCase().split(',');
-        const aCategoryMatch = aCategories.some((cat) =>
-          cat.includes(searchTerm),
-        );
-        const bCategoryMatch = bCategories.some((cat) =>
-          cat.includes(searchTerm),
-        );
+        const aCategoryMatch = aCategories.some(cat => cat.trim() === searchTerm);
+        const bCategoryMatch = bCategories.some(cat => cat.trim() === searchTerm);
         if (aCategoryMatch && !bCategoryMatch) return -1;
         if (!aCategoryMatch && bCategoryMatch) return 1;
 
-        // Partial name match gets third priority
-        const aPartialMatch = aName.includes(searchTerm);
-        const bPartialMatch = bName.includes(searchTerm);
-        if (aPartialMatch && !bPartialMatch) return -1;
-        if (!aPartialMatch && bPartialMatch) return 1;
         // If all else is equal, sort by rating
         return Number(b.g_star_rating || 0) - Number(a.g_star_rating || 0);
       });
 
       // Add logging to see what businesses we're getting
-      console.log(
-        'Found businesses:',
-        sortedBusinesses.map((b) => ({
-          name: b.g_business_name,
-          categories: b.g_categories,
-        })),
-      );
+      // console.log(
+      //   'Found businesses:',
+      //   sortedBusinesses.map((b) => ({
+      //     name: b.g_business_name,
+      //     categories: b.g_categories,
+      //   })),
+      // );
 
       if (sortedBusinesses.length === 0) {
         throw new Error(
@@ -270,69 +270,58 @@ export class AiService {
         };
       });
 
-      console.log({ businessData });
+      const businessNames = sortedBusinesses
+        .slice(0, 50)
+        .map((business) => business.g_business_name?.substring(0, 50) || '');
 
-      // 5. Create enhanced prompt with analysis context
-      const prompt = `You are a precise business recommendation system. Return businesses that match the user's search criteria:
+      // 2. AI Prompt for scoring business names only
+      const prompt = `You are a professional business evaluator. Your task is to score businesses for a user looking for top-rated options in "${matchedCity}".
+     Use the following fixed criteria to score each business from 1 to 10:
 
-1. Category Matching:
-   - User is looking for: ${analysis.category}
-   - Match businesses if ANY of these conditions are met:
-     * Business name contains the category keywords
-     * Business categories contain the category keywords
-     * Business categories are related to the requested category
-   - For "sport store" example:
-     * Match: "Sports memorabilia store", "Sportswear store", "Sports equipment"
-     * Match: Business names containing "sport", "sports", "athletic"
-   - For any category:
-     * Look for exact matches
-     * Look for partial matches
-     * Look for related categories
+     1. Location Score (40% weight):
+        - 10: Confirmed physical location in ${matchedCity}
+        - 7: Nearby location serving ${matchedCity}
+        - 5: Online business with local presence
+        - 3: Online only business
 
-2. Location Matching:
-   - Must be in: ${matchedCity}
-   - No exceptions for location
+     2. Reputation Score (40% weight):
+        - 10: 4.5+ stars with 1000+ reviews
+        - 8: 4.0+ stars with 500+ reviews
+        - 6: 4.0+ stars with 100+ reviews
+        - 4: 3.5+ stars with 50+ reviews
+        - 2: Less than 3.5 stars
 
-3. Business Data Analysis:
-   - Check both business name and categories
-   - Consider partial matches in categories
-   - Consider related categories
-   - Then consider rating and popularity
+     3. Relevance Score (20% weight):
+        - 10: Perfect match for search category
+        - 7: Related category
+        - 4: General service provider
+        - 2: Unrelated category
 
-Return a JSON object with this structure:
-{ 
-  "results": [
-    {
-      "name": "Business Name",
-      "rating": 4.5,
-      "category": "Category Name",
-      "matchReason": "Category match: [category]"
-    }
-  ]
-}
+     Business names to evaluate:
+     ${JSON.stringify(businessNames)}
 
-Business data to analyze: ${JSON.stringify(businessData)}
+     Return ONLY the following JSON format, with no other text or explanation:
+     [
+       { "name": "Business 1", "score": 8.5 },
+       { "name": "Business 2", "score": 7.2 }
+     ]`;
 
-IMPORTANT: 
-- Look for both exact and partial category matches
-- Consider business names containing category keywords
-- Consider related categories
-- Return ONLY the JSON object, no additional text.`;
-
-      // 6. Get AI response
+      // 3. Get AI response
       const response = await this.googleAI.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
       });
 
+      // 4. Extract and return business names with AI-generated scores
+      const scoredBusinesses = JSON.parse(
+        (response?.candidates?.[0]?.content?.parts?.[0]?.text ?? '[]')
+          .replace(/```json\n?|\n?```/g, '')
+          .trim(),
+      );
+
+      console.log({ scoredBusinesses });
       // 7. Process response
       const rawContent = response.text ?? '{}';
-      console.log('Raw AI Response:', rawContent);
-
-      // Add more detailed logging of the raw content
-      console.log('Raw content length:', rawContent.length);
-      console.log('First 100 characters:', rawContent.substring(0, 100));
-
       // Match either an object or array
       const jsonMatch = rawContent.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
       if (!jsonMatch) {
@@ -350,15 +339,8 @@ IMPORTANT:
         .replace(/,\s*]/g, ']') // Remove trailing commas in arrays
         .trim();
 
-      // Add logging of the cleaned content before parsing
-      console.log('Cleaned content before parsing:', cleanContent);
-      console.log('Cleaned content length:', cleanContent.length);
-
       try {
         const result = JSON.parse(cleanContent);
-        console.log('Parsed Result:', result);
-
-        // 8. Transform the AI response into the expected format
         // Handle both array and object responses
         const businessList: {
           name: string;
@@ -375,9 +357,6 @@ IMPORTANT:
               rating: business.rating || business.r,
               category: business.category || business.c,
             }));
-
-        // Add this log to inspect businessList after parsing
-        console.log('Populated businessList after parsing:', businessList);
 
         // 9. Match with database - Improved matching logic using categories
         const matchedResults = (
@@ -445,7 +424,17 @@ IMPORTANT:
           .filter(
             (business, index, self) =>
               index === self.findIndex((b) => b._id === business._id),
-          );
+          )
+          // Add sorting by score
+          .sort((a, b) => {
+            const aScore = scoredBusinesses.find((sb: { name: string; }) => 
+              sb.name.toLowerCase() === a.g_business_name.toLowerCase()
+            )?.score || 0;
+            const bScore = scoredBusinesses.find((sb: { name: string; }) => 
+              sb.name.toLowerCase() === b.g_business_name.toLowerCase()
+            )?.score || 0;
+            return bScore - aScore; // Sort in descending order (highest score first)
+          });
 
         // 10. Return results with proper structure
         return {
@@ -460,12 +449,19 @@ IMPORTANT:
             return {
               name: business.g_business_name,
               rating: business.g_star_rating,
-              categories: categories, // Return all categories
+              categories: categories,
             };
           }),
           m: matchedResults.map((business) => ({
-            ...business,
-            g_categories: business.g_categories, // Keep original categories string
+            _id: business._id,
+            g_business_name: business.g_business_name,
+            g_categories: business.g_categories,
+            g_star_rating: business.g_star_rating,
+            g_full_address: business.g_full_address,
+            g_latitude: business.g_latitude,
+            g_longitude: business.g_longitude,
+            g_review_count: business.g_review_count,
+            google_maps_url: business.google_maps_url
           })),
           l: matchedCity,
           q: text,
