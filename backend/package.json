@@ -1,7 +1,7 @@
 {
-  "name": "b2b-vendor-app",
+  "name": "survey-app",
   "version": "0.0.1",
-  "description": "B2B Vendor Application with Authentication",
+  "description": "Application with Authentication",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
