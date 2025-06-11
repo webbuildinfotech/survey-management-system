@@ -38,7 +38,23 @@ export class BusinessProfileController {
     }
     
     console.log('Received search request:', { query, location });
-    const results = await this.businessProfileService.searchPlaces(query, location);
+    const results = await this.businessProfileService.searchPlaces(query);
+    console.log('Search results count:', results.length);
+    return results;
+  }
+
+
+  @Get('search/data')
+  async searchPlacesData(
+    @Query('query') query: string,
+    @Query('location') location?: string,
+  ): Promise<any[]> {
+    if (!query) {
+      throw new Error('Query parameter is required');
+    }
+    
+    console.log('Received search request:', { query, location });
+    const results = await this.businessProfileService.searchPlacesData(query,location);
     console.log('Search results count:', results.length);
     return results;
   }

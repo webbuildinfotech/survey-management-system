@@ -2,16 +2,26 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BusinessProfileController } from './business.profile.controller';
 import { BusinessProfileService } from './business.profile.service';
-import { BusinessProfile, BusinessProfileSchema } from './business.profile.schema';
+import { Business, BusinessSchema } from '../business/business.schema';
+import { GoogleGenAI } from '@google/genai';
 
+const GOOGLE_AI_API_KEY = 'AIzaSyBkunWP4l4SVzCSbaP_oVNHrXO9OI_R33k' 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: BusinessProfile.name, schema: BusinessProfileSchema },
+      { name: Business.name, schema: BusinessSchema }
     ]),
   ],
   controllers: [BusinessProfileController],
-  providers: [BusinessProfileService],
+  providers: [
+    BusinessProfileService,
+    {
+      provide: GoogleGenAI,
+      useValue: new GoogleGenAI({
+        apiKey: GOOGLE_AI_API_KEY
+      })
+    }
+  ],
   exports: [BusinessProfileService],
 })
 export class BusinessProfileModule {}
