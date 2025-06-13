@@ -12,15 +12,6 @@ const GOOGLE_PLACES_API_KEY = 'AIzaSyBdwSXsHESmuxHEKMdSu2DXfgMPrqYvJSE';
 // const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY as string;
 console.log('API Key:', GOOGLE_PLACES_API_KEY ? 'Present' : 'Missing');
 
-interface GooglePlace {
-  place_id: string;
-  name: string;
-  formatted_address: string;
-  rating: number;
-  types: string[];
-  is_existing: boolean;
-}
-
 @Injectable()
 export class BusinessProfileService {
   constructor(
@@ -29,48 +20,6 @@ export class BusinessProfileService {
     private googleAI: GoogleGenAI,
   ) {}
 
-  private calculateNameSimilarity(name1: string, name2: string): number {
-    const str1 = name1.toLowerCase();
-    const str2 = name2.toLowerCase();
-    
-    // Remove special characters and extra spaces
-    const clean1 = str1.replace(/[^a-z0-9]/g, '').trim();
-    const clean2 = str2.replace(/[^a-z0-9]/g, '').trim();
-    
-    // Calculate similarity percentage
-    const longer = clean1.length > clean2.length ? clean1 : clean2;
-    const shorter = clean1.length > clean2.length ? clean2 : clean1;
-    
-    if (longer.length === 0) return 1.0;
-    
-    return (longer.length - this.editDistance(longer, shorter)) / longer.length;
-  }
-
-  private editDistance(str1: string, str2: string): number {
-    const track = Array(str2.length + 1).fill(null).map(() =>
-      Array(str1.length + 1).fill(null));
-    
-    for (let i = 0; i <= str1.length; i += 1) {
-      track[0][i] = i;
-    }
-    for (let j = 0; j <= str2.length; j += 1) {
-      track[j][0] = j;
-    }
-
-    for (let j = 1; j <= str2.length; j += 1) {
-      for (let i = 1; i <= str1.length; i += 1) {
-        const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
-        track[j][i] = Math.min(
-          track[j][i - 1] + 1,
-          track[j - 1][i] + 1,
-          track[j - 1][i - 1] + indicator
-        );
-      }
-    }
-
-    return track[str2.length][str1.length];
-  }
-
   async createFromGooglePlaces(
     placeId: string,
     apiKey: string,
@@ -78,9 +27,9 @@ export class BusinessProfileService {
     try {
       const apiKey = GOOGLE_PLACES_API_KEY;
       // Check if profile already exists
-      const existingProfile = await this.BusinessModel
-        .findOne({ place_id: placeId })
-        .exec();
+      const existingProfile = await this.BusinessModel.findOne({
+        place_id: placeId,
+      }).exec();
       if (existingProfile) {
         return existingProfile;
       }
@@ -238,142 +187,221 @@ export class BusinessProfileService {
     }
   }
 
-
   async searchPlaces(query: string): Promise<any[]> {
     try {
-      const apiKey = GOOGLE_PLACES_API_KEY;
-      if (!apiKey) {
-        throw new Error('Google Places API key is not configured');
-      }
+      // 1. AI intent and location
+      // const analysisPrompt = `
+      //   Analyze this search query and map it to Google Places API categories:
+      //   Query: "${query}"
 
-      // AI से क्वेरी को समझने के लिए प्रॉम्प्ट बनाएं
+      //   Return a JSON with:
+      //   {
+      //     "location": "extracted location",
+      //     "intent": "main search intent",
+      //     "categories": ["list", "of", "relevant", "google", "places", "categories"]
+      //   }
+      // `;
+
       const analysisPrompt = `
-        Analyze this search query to extract location and search intent:
-        Query: "${query}"
-        
-        Please provide:
-        1. The location mentioned (if any)
-        2. The search intent (what kind of places they're looking for)
-        Format: JSON with "location" and "intent" fields
-      `;
+step:1 Your are Proffwsional Analyze this search query and map it to Google Places API categories
+Query: "${query}"
+Your task is to:
+1. Identify the location in the query.
+2. Determine the main intent of the user, even if the language is emotional or vague (e.g., "lovely", "cool", "famous").
+3. Dynamically map that intent to real, specific Google Places API categories such as: "restaurant", "park", "gym", "beauty_salon", "tourist_attraction", "school", "hospital", etc.
 
-      // AI से विश्लेषण प्राप्त करें
+step:2 Google Places categories are context-sensitive, so choose only those that actually match the user’s underlying interest.
+### Examples:
+- "a beautiful spot in Bangalore" → { location: "Bangalore", intent: "scenic location", categories: ["tourist_attraction", "park"] }
+- "cool hangout in Mumbai" → { location: "Mumbai", intent: "hangout place", categories: ["cafe", "bar", "night_club"] }
+- "the lovely place in Delhi" → { location: "Delhi", intent: "romantic or scenic place", categories: ["tourist_attraction", "monument", "park"] }
+- "top gym in Pune" → { location: "Pune", intent: "find gym", categories: ["gym"] }
+- "famous food in Indore" → { location: "Indore", intent: "find popular food", categories: ["restaurant", "food"] }
+- "historical sites near Jaipur" → { location: "Jaipur", intent: "visit historical places", categories: ["museum", "tourist_attraction", "landmark"] }
+Query: "${query}"
+
+step:3 Now return a strict JSON with:
+{
+  "location": "city or area name",
+  "intent": "user’s inferred search intent",
+  "categories": ["list", "of", "google_places_api", "categories"]
+}
+`;
+
       const aiResponse = await this.googleAI.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: [{ role: 'user', parts: [{ text: analysisPrompt }] }],
       });
 
-      const aiAnalysis = aiResponse?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const aiText =
+        aiResponse?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const cleanJson = aiText.replace(/```json\n?|\n?```/g, '').trim();
+
       let location = '';
-      let searchIntent = '';
+      let intent = '';
+      let categories: string[] = [];
 
       try {
-        // मार्कडाउन फॉर्मेटिंग को हटाएं
-        const cleanJson = aiAnalysis.replace(/```json\n?|\n?```/g, '').trim();
-        const parsedAnalysis = JSON.parse(cleanJson);
-        location = parsedAnalysis.location || '';
-        searchIntent = parsedAnalysis.intent || '';
-      } catch (e) {
-        console.error('Failed to parse AI analysis:', e);
+        const parsed = JSON.parse(cleanJson);
+        location = parsed.location || '';
+        intent = parsed.intent || '';
+        categories = parsed.categories || [];
+      } catch (err) {
+        console.error('AI JSON parsing failed:', err);
       }
 
-      // अगर लोकेशन नहीं मिली है, तो Geocoding API का उपयोग करें
-      if (!location) {
-        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`;
-        const geocodeResponse = await axios.get(geocodeUrl);
-        
-        if (geocodeResponse.data.results && geocodeResponse.data.results.length > 0) {
-          const addressComponents = geocodeResponse.data.results[0].address_components;
-          const cityComponent = addressComponents.find(
-            (component: any) => component.types.includes('locality')
-          );
-          if (cityComponent) {
-            location = cityComponent.long_name;
-          }
-        }
-      }
+      // 2. metro area
+      const metroPrompt = `
+      List ALL major areas around ${location} including:
+      - Main city areas
+      - All major suburbs
+      - All surrounding towns within 30 miles
+      - All important neighborhoods
 
-      // अब सर्च क्वेरी बनाएं
-      let searchQuery = searchIntent || query;
-      if (location) {
-        searchQuery = `${searchQuery} in ${location}`;
-      }
+      Return ONLY a comma-separated list of area names, nothing else.
+      `;
 
-      // console.log('Final search query:', searchQuery); // डीबग के लिए
-      
-      const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${apiKey}`;
-      
-      const placesResponse = await axios.get(searchUrl);
-      
-      if (!placesResponse.data.results) {
-        return [];
-      }
-
-      // Get all places from database in the specified location
-      const existingPlaces = await this.BusinessModel.find({
-        g_city: location
-      }).exec();
-
-      // Match Google results with database entries
-      const matchedPlaces = placesResponse.data.results.map((googlePlace: any) => {
-        const bestMatch = existingPlaces.find(dbPlace => {
-          if (!googlePlace?.name || !dbPlace?.g_business_name) {
-            return false;
-          }
-          const similarity = this.calculateNameSimilarity(
-            googlePlace.name,
-            dbPlace.g_business_name
-          );
-          console.log('Similarity:', similarity);
-          return similarity >= 0.8; // 80% match threshold
-        });
-
-        if (bestMatch) {
-          return {
-            ...bestMatch.toObject(),
-            is_existing: true
-          };
-        }
-
-        return {
-          name: googlePlace.name || '',
-          place_id: googlePlace.place_id || '',
-          formatted_address: googlePlace.formatted_address || '',
-          rating: googlePlace.rating || 0,
-          types: googlePlace.types || [],
-          is_existing: false
-        };
+      const aiArea = await this.googleAI.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: [{ role: 'user', parts: [{ text: metroPrompt }] }],
       });
 
-      // Create new profiles for unmatched places
-      const newPlaces = await Promise.all(
-        matchedPlaces
-          .filter((place: GooglePlace) => !place.is_existing)
-          .map(async (place: GooglePlace) => {
-            try {
-              return await this.createFromGooglePlaces(place.place_id, apiKey);
-            } catch (error) {
-              console.error(`Failed to create profile for place ${place.place_id}:`, error);
-              return null;
-            }
+      const rawText = aiArea?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      console.log('Raw Metro Areas from AI:', rawText);
+
+      const metroAreas = rawText
+        .replace(/\[|\]/g, '')
+        .split(',')
+        .map((area) => area.trim().replace(/^"|"$/g, ''))
+        .filter((area) => area && !area.includes('\n'))
+        .filter((area, index, self) => self.indexOf(area) === index);
+
+      const allLocations = [location, ...metroAreas];
+      // const cityRegexConditions = allLocations.map((area) => ({
+      //   g_city: { $regex: area, $options: 'i' },
+      // }));
+      const cleanedAreas = allLocations.map((area) => {
+        if (
+          area.toLowerCase().includes(location.toLowerCase()) &&
+          area.toLowerCase() !== location.toLowerCase()
+        ) {
+          // Remove the city name from compound areas like "Downtown Anchorage"
+          return area.replace(new RegExp(`\\s*${location}`, 'i'), '').trim();
+        }
+        return area;
+      });
+
+      const cityRegexConditions = cleanedAreas.map((area) => ({
+        g_city: { $regex: `\\b${area}\\b`, $options: 'i' },
+      }));
+
+      console.log('City Regex Conditions:', cityRegexConditions);
+      console.log('Intent:', intent);
+
+      const processCategories = (categories: string[]) => {
+        return categories
+          .map((cat) => {
+            const variations = [
+              cat, // like "bus_station"
+              cat.replace(/_/g, ' '), // like "bus station"
+              cat.split('_').join(' '), // like "bus station"
+              cat.split('_')[0], // like "bus"
+              cat.replace(/_/g, ''), // like "busstation"
+            ];
+            return variations;
           })
-      );
+          .flat();
+      };
 
-      // Combine results
-      const results = [
-        ...matchedPlaces.filter((place: { is_existing: any; }) => place.is_existing),
-        ...newPlaces.filter(place => place !== null)
-      ];
+      const expandedCategories = processCategories(categories);
 
-      return results;
+      console.log('Categories:', expandedCategories);
+      console.log('step 1:')
+      const matchedPlaces = await this.BusinessModel.find({
+        $and: [
+          {
+            
+            $or: [
+              // single string case
+              
+              { g_categories: { $in: expandedCategories } },
+              // array case
+              { g_categories: { $elemMatch: { $in: expandedCategories } } },
+              // partial match for
+              ...expandedCategories.map((category) => ({
+                $or: [
+                  {
+                    g_categories: {
+                      $regex: new RegExp(`\\b${category}\\b`, 'i'),
+                    },
+                  },
+                  {
+                    g_categories: {
+                      $elemMatch: {
+                        $regex: new RegExp(`\\b${category}\\b`, 'i'),
+                      },
+                    },
+                  },
+                ],
+              })),
+            ],
+          },
+          {
+            $or: cityRegexConditions,
+          },
+        ],
+        
+      })
+        
+        .sort({ google_maps_url: 1 }) // sort by google_maps_url
+        .exec();
+        console.log('step 2:')
+
+      // Step 1: Score businesses by number of matched categories
+      const scoredPlaces = matchedPlaces.map((business) => {
+        console.log('step 3:')
+
+        const businessCategories = Array.isArray(business.g_categories)
+          ? business.g_categories
+          : [business.g_categories];
+
+        const matchCount = businessCategories.reduce((count, cat) => {
+          console.log('step 4:')
+
+          return (
+            count +
+            expandedCategories.filter((expandedCat) =>
+              new RegExp(`\\b${expandedCat}\\b`, 'i').test(cat),
+            ).length
+          );
+        }, 0);
+        console.log('step 5:')
+        return {
+          business,
+          matchScore: matchCount,
+        };
+      });
+      console.log('step 6:')
+      // Step 2: Sort by matchScore (descending)
+      const sortedPlaces = scoredPlaces
+        .sort((a, b) => b.matchScore - a.matchScore)
+        .map((entry) => entry.business);
+      console.log('step 7:')
+      // Step 3: Remove duplicates by google_maps_url
+      const uniquePlaces = sortedPlaces.reduce<Business[]>((acc, current) => {
+        const exists = acc.find(
+          (item) => item.google_maps_url === current.google_maps_url,
+        );
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
+      return uniquePlaces;
     } catch (error) {
       console.error('Error in searchPlaces:', error);
-      if (error instanceof Error) {
-        throw new Error(`Failed to search places: ${error.message}`);
-      }
-      throw new Error('Failed to search places: Unknown error');
+      throw new Error('Failed to search places');
     }
   }
-
-
 }
