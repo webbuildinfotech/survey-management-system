@@ -10,7 +10,7 @@ import { Business, BusinessDocument } from '../business/business.schema';
 import { GoogleGenAI } from '@google/genai';
 const GOOGLE_PLACES_API_KEY = 'AIzaSyBdwSXsHESmuxHEKMdSu2DXfgMPrqYvJSE';
 // const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY as string;
-console.log('API Key:', GOOGLE_PLACES_API_KEY ? 'Present' : 'Missing');
+// console.log('API Key:', GOOGLE_PLACES_API_KEY ? 'Present' : 'Missing');
 
 @Injectable()
 export class BusinessProfileService {
@@ -267,7 +267,6 @@ step:3 Now return a strict JSON with:
       });
 
       const rawText = aiArea?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      console.log('Raw Metro Areas from AI:', rawText);
 
       const metroAreas = rawText
         .replace(/\[|\]/g, '')
@@ -316,14 +315,12 @@ step:3 Now return a strict JSON with:
       const expandedCategories = processCategories(categories);
 
       console.log('Categories:', expandedCategories);
-      console.log('step 1:')
       const matchedPlaces = await this.BusinessModel.find({
         $and: [
           {
-            
             $or: [
               // single string case
-              
+
               { g_categories: { $in: expandedCategories } },
               // array case
               { g_categories: { $elemMatch: { $in: expandedCategories } } },
@@ -350,24 +347,18 @@ step:3 Now return a strict JSON with:
             $or: cityRegexConditions,
           },
         ],
-        
       })
-        
+
         .sort({ google_maps_url: 1 }) // sort by google_maps_url
         .exec();
-        console.log('step 2:')
 
       // Step 1: Score businesses by number of matched categories
       const scoredPlaces = matchedPlaces.map((business) => {
-        console.log('step 3:')
-
         const businessCategories = Array.isArray(business.g_categories)
           ? business.g_categories
           : [business.g_categories];
 
         const matchCount = businessCategories.reduce((count, cat) => {
-          console.log('step 4:')
-
           return (
             count +
             expandedCategories.filter((expandedCat) =>
@@ -375,18 +366,15 @@ step:3 Now return a strict JSON with:
             ).length
           );
         }, 0);
-        console.log('step 5:')
         return {
           business,
           matchScore: matchCount,
         };
       });
-      console.log('step 6:')
       // Step 2: Sort by matchScore (descending)
       const sortedPlaces = scoredPlaces
         .sort((a, b) => b.matchScore - a.matchScore)
         .map((entry) => entry.business);
-      console.log('step 7:')
       // Step 3: Remove duplicates by google_maps_url
       const uniquePlaces = sortedPlaces.reduce<Business[]>((acc, current) => {
         const exists = acc.find(
