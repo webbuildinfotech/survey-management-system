@@ -232,6 +232,7 @@ step:3 Now return a strict JSON with:
         model: 'gemini-2.0-flash',
         contents: [{ role: 'user', parts: [{ text: analysisPrompt }] }],
       });
+      // console.log('Token usage:', aiResponse?.usage); 
 
       const aiText =
         aiResponse?.candidates?.[0]?.content?.parts?.[0]?.text || '';

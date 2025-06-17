@@ -12,6 +12,7 @@ import { BsSearch } from "react-icons/bs";
 import Header from "../components/Header";
 import UserHeader from "../components/UserHeader";
 import { RoutePaths } from "../routes/Path";
+import { LuBell } from "react-icons/lu";
 
 const MainLayout = () => {
   
@@ -24,12 +25,11 @@ const MainLayout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      {/* Main content area with sidebars */}
-      <main className="flex flex-1">
+      <main className="flex flex-1 pt-16">
         {/* Left Sidebar - Fixed on medium and up */}
         <div
-          className={`hidden md:block fixed left-0 top-0 h-screen transition-all duration-300 ${
-            isSidebarCollapsed ? "w-16 py-8 p-1" : "w-95 p-5"
+          className={`hidden md:block fixed left-0 transition-all  duration-300  ${
+            isSidebarCollapsed ? "w-16 py-8 p-1" : ""
           }  border-r-none`}
         >
           <LeftSidebar isCollapsed={isSidebarCollapsed} />
@@ -37,22 +37,16 @@ const MainLayout = () => {
 
         {/* Main Content Area */}
         <div
-          className={`flex-1 mt-9 pb-16 md:pb-0 transition-all duration-300 ${
+          className={`flex-1 bg-gray-100 transition-all duration-300 ${
             isSidebarCollapsed ? "md:ml-16" : "md:ml-16 xl:ml-100"
           } xl:mr-100 max-xl:px-8 max-md:px-0`}
         >
-          {locate && (
-            <UserHeader
-              isSidebarCollapsed={isSidebarCollapsed}
-              setIsSidebarCollapsed={setIsSidebarCollapsed}
-            />
-          )}
           <Outlet />
         </div>
 
         {/* Right Sidebar - Fixed on medium and up, hidden on smaller screens */}
         <div
-          className="hidden xl:block fixed right-0 top-0 h-screen p-5 overflow-y-auto min-[1279px]:max-[1330px]:w-90 min-[1331px]:w-100"
+          className="hidden xl:block fixed bg-gray-100 right-0 top-14 p-5 overflow-y-auto min-[1279px]:max-[1330px]:w-90 min-[1331px]:w-100"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           <style>

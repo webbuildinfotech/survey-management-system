@@ -44,54 +44,41 @@ const LeftSidebar = ({ isCollapsed }) => {
 
   return (
     // For Figma
-    // <div
-    //   className={`w-16 ${!isCollapsed ? "xl:w-100" : ""} flex flex-col ${
-    //     !isCollapsed ? "xl:pl-32 py-12" : ""
-    //   } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen justify-between`}
-    // >
 
     <div
-      className={`w-16 ${!isCollapsed ? "xl:w-100" : ""} flex flex-col ${
+      className={`w-16  ${!isCollapsed ? "xl:w-100" : ""} flex flex-col ${
         !isCollapsed ? "xl:pl-3 p-4" : ""
-      } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen justify-between`}
+      } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen`}
     >
-      <div>
-        <div
-          className={`text-3xl font-bold text-primary mb-20 ${
-            isCollapsed ? "hidden" : "hidden xl:block"
-          }`}
-        >
-          Griterr
-        </div>
-        <nav>
-          <ul>
-            {navItems.map((item) => (
-              <li key={item.name} className="mb-4">
-                <Link
-                  to={item.path}
-                  className={`flex items-center px-2 py-2 rounded-lg transition-colors ${
-                    currentPath === item.path
-                      ? "text-blue-600 font-semibold"
-                      : "text-gray-700 hover:text-blue-600"
-                  }`}
+      <nav className="mt-20 xl:ml-30">
+        <ul>
+          {navItems.map((item) => (
+            <li key={item.name} className="mb-4">
+              <Link
+                to={item.path}
+                className={`flex items-center justify-center xl:justify-start px-2 py-2 rounded-lg transition-colors ${
+                  currentPath === item.path
+                    ? "text-blue-600 font-semibold"
+                    : "text-gray-700 hover:text-blue-600"
+                }`}
+              >
+                <span className={!isCollapsed ? "xl:mr-4" : ""}>
+                  {item.icon}
+                </span>
+                <span
+                  className={`${
+                    isCollapsed ? "hidden" : "hidden xl:block"
+                  } text-2xl font-medium`}
                 >
-                  <span className={!isCollapsed ? "xl:mr-4" : ""}>
-                    {item.icon}
-                  </span>
-                  <span
-                    className={`${
-                      isCollapsed ? "hidden" : "hidden xl:block"
-                    } text-2xl font-medium`}
-                  >
-                    {item.name}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-      <div className="mb-2">
+                  {item.name}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* <div className="mb-2">
         <Link
           to="/settings"
           className="flex items-center text-gray-700 hover:text-blue-600 px-2 py-2 rounded-lg"
@@ -107,7 +94,7 @@ const LeftSidebar = ({ isCollapsed }) => {
             Settings
           </span>
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 };
