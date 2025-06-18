@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { RoutePaths } from "../../routes/Path";
 import { GoHome } from "react-icons/go";
 import { MdSearch } from "react-icons/md";
-import { LuSquarePlus } from "react-icons/lu";
+import { LuBell, LuSquarePlus } from "react-icons/lu";
 import { RiChatPollLine } from "react-icons/ri";
 import { HiOutlineUser } from "react-icons/hi";
 import { LiaCogSolid } from "react-icons/lia";
@@ -28,9 +28,9 @@ const LeftSidebar = ({ isCollapsed }) => {
       icon: <LuSquarePlus className="size-8" />,
     },
     {
-      name: "Answers",
-      path: "/answers",
-      icon: <RiChatPollLine className="size-8" />,
+      name: "Notifications",
+      path: "/notifications",
+      icon: <LuBell className="size-8" />,
     },
     {
       name: "Profile",
@@ -48,7 +48,7 @@ const LeftSidebar = ({ isCollapsed }) => {
     <div
       className={`w-16  ${!isCollapsed ? "xl:w-100" : ""} flex flex-col ${
         !isCollapsed ? "xl:pl-3 p-4" : ""
-      } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen`}
+      } pb-10 ${!isCollapsed ? "" : "p-0"} h-full min-h-screen bg-white`}
     >
       <nav className="mt-20 xl:ml-30">
         <ul>
@@ -68,7 +68,7 @@ const LeftSidebar = ({ isCollapsed }) => {
                 <span
                   className={`${
                     isCollapsed ? "hidden" : "hidden xl:block"
-                  } text-2xl font-medium`}
+                  } text-xl font-medium`}
                 >
                   {item.name}
                 </span>

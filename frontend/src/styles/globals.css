@@ -1,5 +1,10 @@
 /* Text Color */
 
+body{
+  background-color:  #f3f4f6;
+}
+
+
 .text-primary {
   color: #1d9bf0;
 }
@@ -53,4 +58,10 @@
 
 .border-grey{
   border-color: #888888;
+}
+
+/* Icon */
+
+.bg-restaurant{
+  background-color: #E1F0F9;
 }
