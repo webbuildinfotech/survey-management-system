@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { FiMenu } from "react-icons/fi";
 import { LuBell } from "react-icons/lu";
 
-const Header = ({isCollapsed}) => {
+const Header = ({isCollapsed, pageTitle = "Home Feed"}) => {
+  
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-3 pl-4 bg-white shadow-sm">
       {/* left side */}
@@ -13,7 +14,7 @@ const Header = ({isCollapsed}) => {
 
       {/* center */}
       <div className="hidden xl:flex items-center justify-between flex-2">
-        <span className="text-base font-medium mr-4">Home Feed</span>
+        <span className="text-base font-medium mr-4">{pageTitle}</span>
         <LuBell className="size-5 cursor-pointer" />
       </div>
 

@@ -11,9 +11,26 @@ const MainLayout = () => {
   const location = useLocation();
   const locate = location.pathname === RoutePaths.SEARCH;
 
+  // Get page title based on current pathname
+  const getPageTitle = () => {
+    const pathname = location.pathname;
+    
+    if (pathname === RoutePaths.SEARCH) {
+      return "Search";
+    } else if (pathname === RoutePaths.PROFILE) {
+      return "Profile";
+    } else if (pathname === RoutePaths.CREATE) {
+      return "Create";
+    } else if (pathname === RoutePaths.NOTIFICATION) {
+      return "Notification";
+    } else {
+      return "Home Feed";
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Header isCollapsed={isSidebarCollapsed}/>
+      <Header isCollapsed={isSidebarCollapsed} pageTitle={getPageTitle()}/>
       <main className="flex flex-1 mt-14">
         {/* Left Sidebar - Fixed on medium and up */}
         <div
